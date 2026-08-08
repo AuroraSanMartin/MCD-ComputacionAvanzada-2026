@@ -1,32 +1,31 @@
-# Nombre Apellido
+# Aurora San Martín Olivos
 
 ## Perfil
 
-**Disciplina / formación:**  
-**Qué hago hoy:**  
-**Qué me gustaría aprender en este curso:**  
+**Disciplina / formación:** Ingeniería en Diseño, Universidad Adolfo Ibáñez.
+Empecé mis estudios desde el plan común de Ingeniería Civil, lo cual me permitió desarrollarme en un ámbito matemático. Durante mi formación en Ingeniería en Diseño decidí especializarme en la representación visual y la electrónica, siendo ayudante de Modelación 3D, Representación Visual II, Taller de diseño de interfaces, Electrónica aplicada a prototipos y Diseño y construcción de interfaces.
+
+**Qué hago hoy:** Talleres extracurriculares de Modelación 3D y Robótica, School of Makers.
+
+**Qué me gustaría aprender en este curso:** Me gustaría aprender a visualizar información leída con sensores.
 
 ## Intereses
 
-- Tema o disciplina 1
-- Tema o disciplina 2
-- Tema o disciplina 3
+- Electrónica y Microcontroladores (Arduino, Raspberry).
+- Dibujo, ilustración y creación de personajes.
+- Videojuegos.
 
 ## Una pregunta que me interesa explorar
 
-Escribe una pregunta pequeña que pueda transformarse en reglas, datos, geometría, imágenes o interacción.
+¿Cómo visibilizar el efecto de la sobrecarga sensorial que sufren las personas con migraña a personas que no padecen esta patología?
 
 ## Algo que me inspira
 
-Agrega una imagen local en `assets/images/` y cítala con Markdown, o agrega un link a un proyecto/referencia.
+Me inspira ver el diseño como una forma de ayudar a personas de distintas discapacidades. 
 
-```md
-![Descripción de la imagen](../assets/images/mi-imagen.jpg)
-```
+![Sostén con enganche magnético para personas con dificultad motora](../assets/images/Liberare.png)
+![Silla de ruedas para pararse](../assets/images/Wheelchair.jpg)
 
 ## Links
 
-- [Referencia 1](https://example.com)
-- [Referencia 2](https://example.com)
-
-> No es necesario publicar información personal que no quieras compartir. Este README será parte de un repositorio público durante el laboratorio.
+- [Linkedin](https://www.linkedin.com/in/aurora-san-mart%C3%ADn-olivos/)
