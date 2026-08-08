@@ -21,10 +21,10 @@ Empecé mis estudios desde el plan común de Ingeniería Civil, lo cual me permi
 
 ## Algo que me inspira
 
-Me inspira ver el diseño como una forma de ayudar a personas de distintas discapacidades. 
+Me inspira ver el diseño como una forma de ayudar a personas de distintas discapacidades, como lo son la siguiente silla de ruedas que permite que el usuario se pare o el sostén con encanche magnético para personas con distintas dificultades manuales. 
+![Silla de ruedas para pararse](../assets/images/Wheelchair.jpg)
 
 ![Sostén con enganche magnético para personas con dificultad motora](../assets/images/Liberare.png)
-![Silla de ruedas para pararse](../assets/images/Wheelchair.jpg)
 
 ## Links
 
