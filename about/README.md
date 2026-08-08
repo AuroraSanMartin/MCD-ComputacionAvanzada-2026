@@ -12,7 +12,9 @@ Empecé mis estudios desde el plan común de Ingeniería Civil, lo cual me permi
 ## Intereses
 
 - Electrónica y Microcontroladores (Arduino, Raspberry).
+![Controlador UR5](../assets/images/Arduino.jpg)
 - Dibujo, ilustración y creación de personajes.
+![Dibujo](../assets/images/Dibujo.jpg)
 - Videojuegos.
 
 ## Una pregunta que me interesa explorar
