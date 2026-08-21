@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Campo Generativo 01</title>
+  <title>Visualizador de migraña</title>
   <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
@@ -12,9 +12,9 @@
       <header class="project-header">
         <div>
           <p class="eyebrow">COMPUTACIÓN AVANZADA · MCD UAI</p>
-          <h1>Campo Generativo 01</h1>
+          <h1>Visualizador de migraña</h1>
           <p class="subtitle">
-            Un sistema tridimensional simple para explorar reglas, parámetros e iteración.
+            Lab02; Aurora San Martín
           </p>
         </div>
       </header>
@@ -33,32 +33,10 @@
       </div>
 
       <section class="control-group">
-        <h3>Sistema</h3>
-
-        <label>
-          <span>Columnas</span>
-          <output id="columnas-valor">15</output>
-          <input id="columnas" type="range" min="5" max="30" step="1" value="15" />
-        </label>
-
-        <label>
-          <span>Filas</span>
-          <output id="filas-valor">15</output>
-          <input id="filas" type="range" min="5" max="30" step="1" value="15" />
-        </label>
-
-        <label>
-          <span>Separación</span>
-          <output id="separacion-valor">1.20</output>
-          <input id="separacion" type="range" min="0.7" max="2.0" step="0.05" value="1.2" />
-        </label>
-      </section>
-
-      <section class="control-group">
         <h3>Comportamiento</h3>
 
         <label>
-          <span>Amplitud</span>
+          <span>Contraste</span>
           <output id="amplitud-valor">3.00</output>
           <input id="amplitud" type="range" min="0" max="6" step="0.1" value="3" />
         </label>
@@ -72,7 +50,7 @@
         <label>
           <span>Rotación</span>
           <output id="rotacion-valor">0.30</output>
-          <input id="rotacion" type="range" min="0" max="1.2" step="0.05" value="0.3" />
+          <input id="rotacion" type="range" min="0.3" max="0.3" step="0.05" value="0.3" disabled />
         </label>
       </section>
 
@@ -89,6 +67,36 @@
           <span>Semilla</span>
           <output id="semilla-valor">42</output>
           <input id="semilla" type="range" min="1" max="100" step="1" value="42" />
+        </label>
+
+        <label>
+          <span>Visual</span>
+          <output id="visual-valor">1</output>
+          <input id="visual" type="range" min="1" max="5" step="1" value="1" />
+        </label>
+
+        <label>
+          <span>Ruido</span>
+          <output id="ruido-valor">0.00</output>
+          <input id="ruido" type="range" min="0" max="0.49" step="0.01" value="0" />
+        </label>
+
+        <label>
+          <span>Calor</span>
+          <output id="calor-valor">0.00</output>
+          <input id="calor" type="range" min="0" max="1" step="0.01" value="0" />
+        </label>
+
+        <label>
+          <span>Olor</span>
+          <output id="olor-valor">0.00</output>
+          <input id="olor" type="range" min="0" max="1" step="0.01" value="0" />
+        </label>
+
+        <label>
+          <span>Migraña</span>
+          <output id="migrana-valor">0.00</output>
+          <input id="migrana" type="range" min="0" max="1" step="0.01" value="0" />
         </label>
       </section>
 
