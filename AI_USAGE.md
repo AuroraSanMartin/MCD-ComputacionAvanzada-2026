@@ -47,3 +47,13 @@ Modificó el código base para que generar molestia visual mediante aleatoriedad
 Corregí manualmente errores ortográficos o de escritura, como martín->Martín y ruido/fillet por solamente ruido.
 **Qué aprendí / qué error apareció:**  
 Especifidad al escribir, utilizar términos lo más literales posibles.
+
+### 26-08-2026 - Exercise-02
+
+**Herramienta / agente:**  
+Copilot
+**Qué pedí:**
+"Cambia Exercise-02 para que visualice el clima de Santiago, Chile usando datos horarios de Open-Meteo."
+
+**Qué cambió en el proyecto:**  
+Se reemplazó el feed GBFS de bicicletas por una consulta horaria de Open-Meteo. La geometría ahora representa horas de clima: temperatura en altura y color, humedad en ancho, y lluvia y viento en el inspector.

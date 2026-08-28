@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clima de Santiago</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <section class="viewport-shell">
+      <header class="project-header">
+        <p class="eyebrow">COMPUTACIÓN AVANZADA · MCD UAI</p>
+        <h1>Clima de Santiago</h1>
+        <p class="subtitle">Cambio de temperatura en Santiago, Chile transformado en geometría.</p>
+      </header>
+
+      <div id="viewport"></div>
+
+      <div class="layer-toggles">
+        <button id="alternar-temperatura" class="temperature-toggle" type="button" aria-pressed="true">
+          Temperatura °C
+        </button>
+        <button id="alternar-migrana" class="temperature-toggle" type="button" aria-pressed="true">
+          Riesgo de migraña
+        </button>
+      </div>
+
+      <div class="legend">
+        <span><i class="dot bikes"></i>Temperatura más alta</span>
+        <span><i class="dot empty"></i>Temperatura más baja</span>
+        <span><i class="dot variation"></i>Torre central: riesgo migraña</span>
+      </div>
+
+      <div class="hint">Arrastra para orbitar · Rueda para acercar · Click en una hora para inspeccionarla</div>
+    </section>
+
+    <aside class="controls-panel">
+      <div class="panel-header">
+        <p class="eyebrow">FUENTE + REPRESENTACIÓN</p>
+        <h2>Pronóstico vivo</h2>
+      </div>
+
+      <section class="status-card">
+        <div class="status-row">
+          <span>Fuente</span>
+          <strong id="fuente-label">Cargando…</strong>
+        </div>
+        <div class="status-row">
+          <span>Estado</span>
+          <strong id="estado-label"><i class="status-dot"></i> conectando</strong>
+        </div>
+        <div class="status-row">
+          <span>Última actualización</span>
+          <strong id="actualizacion-label">—</strong>
+        </div>
+        <div class="status-row">
+          <span>Próxima consulta</span>
+          <strong id="cuenta-regresiva">—</strong>
+        </div>
+      </section>
+
+      <section class="control-group">
+        <h3>Representación</h3>
+
+        <label class="select-label">
+          <span>Distribución</span>
+          <select id="modo-distribucion">
+            <option value="temporal">Dos relojes · AM / PM</option>
+            <option value="temperatura">Ordenada · temperatura</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Escala vertical</span>
+          <output id="escala-altura-valor">0.50</output>
+          <input id="escala-altura" type="range" min="0.05" max="0.8" step="0.01" value="0.5" />
+        </label>
+
+        <label>
+          <span>Escala horizontal</span>
+          <output id="escala-ancho-valor">0.50</output>
+          <input id="escala-ancho" type="range" min="0.3" max="1.0" step="0.05" value="0.5" />
+        </label>
+
+        <label>
+          <span>N° horas</span>
+          <output id="cantidad-valor">24</output>
+          <input id="cantidad" type="range" min="12" max="24" step="12" value="24" />
+        </label>
+      </section>
+
+      <section class="mapping">
+        <h3>Reglas de representación</h3>
+        <div class="map-row"><b>hora</b><span>→</span><em>posición X/Z</em></div>
+        <div class="map-row"><b>temperatura</b><span>→</span><em>altura</em></div>
+        <div class="map-row"><b>humedad relativa</b><span>→</span><em>ancho</em></div>
+        <div class="map-row"><b>cambio térmico</b><span>→</span><em>riesgo estimado</em></div>
+        <div class="map-row"><b>torre transparente</b><span>→</span><em>100% de riesgo</em></div>
+      </section>
+
+      <section class="inspector">
+        <h3>Hora seleccionada</h3>
+        <p id="estacion-nombre">Haz click sobre un módulo.</p>
+        <div class="metric-grid">
+          <div><span>Temperatura</span><strong id="m-bicis">—</strong></div>
+          <div><span>Humedad</span><strong id="m-libres">—</strong></div>
+          <div><span>Lluvia</span><strong id="m-capacidad">—</strong></div>
+          <div><span>Viento</span><strong id="m-ocupacion">—</strong></div>
+        </div>
+      </section>
+
+      <div class="actions">
+        <button id="actualizar">Actualizar ahora</button>
+        <button id="pausar" class="secondary">Pausar auto</button>
+      </div>
+    </aside>
+  </main>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
