@@ -57,3 +57,13 @@ Copilot
 
 **Qué cambió en el proyecto:**  
 Se reemplazó el feed GBFS de bicicletas por una consulta horaria de Open-Meteo. La geometría ahora representa horas de clima: temperatura en altura y color, humedad en ancho, y lluvia y viento en el inspector.
+
+### 28-08-2026 - Exercise-02
+
+**Herramienta / agente:**  
+Copilot
+**Qué pedí:**
+"Quita el slider de cantidad de horas y escala horizontal. Subdivide cada torre según sus grados Celsius, muestra la temperatura sobre ella y agrega el porcentaje de riesgo de migraña al panel derecho."
+
+**Qué cambió en el proyecto:**  
+Se fijó el ancho de las torres, se muestran todas las horas disponibles, y cada torre incorpora divisiones por grado Celsius y una etiqueta de temperatura. El riesgo de migraña ahora se calcula también para las estaciones visibles y aparece en el inspector.

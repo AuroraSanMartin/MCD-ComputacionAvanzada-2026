@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Clima de Santiago</title>
+  <title>Riesgo de migraña según el clima de Santiago</title>
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
@@ -21,6 +21,9 @@
         <button id="alternar-temperatura" class="temperature-toggle" type="button" aria-pressed="true">
           Temperatura °C
         </button>
+        <button id="alternar-periodo" class="temperature-toggle" type="button" aria-pressed="false">
+          Mostrar PM
+        </button>
         <button id="alternar-migrana" class="temperature-toggle" type="button" aria-pressed="true">
           Riesgo de migraña
         </button>
@@ -29,7 +32,7 @@
       <div class="legend">
         <span><i class="dot bikes"></i>Temperatura más alta</span>
         <span><i class="dot empty"></i>Temperatura más baja</span>
-        <span><i class="dot variation"></i>Torre central: riesgo migraña</span>
+        <span><i class="dot variation"></i>Centro: riesgo migraña</span>
       </div>
 
       <div class="hint">Arrastra para orbitar · Rueda para acercar · Click en una hora para inspeccionarla</div>
@@ -77,24 +80,13 @@
           <input id="escala-altura" type="range" min="0.05" max="0.8" step="0.01" value="0.5" />
         </label>
 
-        <label>
-          <span>Escala horizontal</span>
-          <output id="escala-ancho-valor">0.50</output>
-          <input id="escala-ancho" type="range" min="0.3" max="1.0" step="0.05" value="0.5" />
-        </label>
-
-        <label>
-          <span>N° horas</span>
-          <output id="cantidad-valor">24</output>
-          <input id="cantidad" type="range" min="12" max="24" step="12" value="24" />
-        </label>
       </section>
 
       <section class="mapping">
         <h3>Reglas de representación</h3>
         <div class="map-row"><b>hora</b><span>→</span><em>posición X/Z</em></div>
         <div class="map-row"><b>temperatura</b><span>→</span><em>altura</em></div>
-        <div class="map-row"><b>humedad relativa</b><span>→</span><em>ancho</em></div>
+        <div class="map-row"><b>humedad relativa</b><span>→</span><em>dato del inspector</em></div>
         <div class="map-row"><b>cambio térmico</b><span>→</span><em>riesgo estimado</em></div>
         <div class="map-row"><b>torre transparente</b><span>→</span><em>100% de riesgo</em></div>
       </section>
@@ -103,10 +95,11 @@
         <h3>Hora seleccionada</h3>
         <p id="estacion-nombre">Haz click sobre un módulo.</p>
         <div class="metric-grid">
-          <div><span>Temperatura</span><strong id="m-bicis">—</strong></div>
-          <div><span>Humedad</span><strong id="m-libres">—</strong></div>
-          <div><span>Lluvia</span><strong id="m-capacidad">—</strong></div>
-          <div><span>Viento</span><strong id="m-ocupacion">—</strong></div>
+          <div><span>Temperatura</span><strong id="m-temperatura">—</strong></div>
+          <div><span>Humedad</span><strong id="m-humedad">—</strong></div>
+          <div><span>Lluvia</span><strong id="m-lluvia">—</strong></div>
+          <div><span>Viento</span><strong id="m-viento">—</strong></div>
+          <div><span>Riesgo migraña</span><strong id="m-riesgo">—</strong></div>
         </div>
       </section>
 

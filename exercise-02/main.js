@@ -13,8 +13,6 @@ const INTERVALO_ACTUALIZACION = 15; // segundos.
 const parametros = {
   modo: "temporal",
   escalaAltura: 0.5,
-  escalaAncho: 0.8,
-  cantidad: 24,
 };
 
 let actualizacionAutomatica = true;
@@ -22,6 +20,7 @@ let segundosRestantes = INTERVALO_ACTUALIZACION;
 let estaciones = [];
 let variaciones = [];
 let objetosEstacion = [];
+let periodoVisible = "am";
 
 // ======================================================
 // 02 — ESCENA
@@ -86,6 +85,14 @@ botonTemperatura.addEventListener("click", () => {
   botonTemperatura.setAttribute("aria-pressed", String(grupoEstaciones.visible));
 });
 
+const botonPeriodo = document.querySelector("#alternar-periodo");
+botonPeriodo.addEventListener("click", () => {
+  periodoVisible = periodoVisible === "am" ? "pm" : "am";
+  botonPeriodo.textContent = periodoVisible === "am" ? "Mostrar PM" : "Mostrar AM";
+  botonPeriodo.setAttribute("aria-pressed", String(periodoVisible === "pm"));
+  generarRepresentacion();
+});
+
 const botonMigrana = document.querySelector("#alternar-migrana");
 botonMigrana.addEventListener("click", () => {
   grupoVariaciones.visible = !grupoVariaciones.visible;
@@ -119,9 +126,12 @@ async function cargarDatosVivos() {
         .slice(0, indiceActual + 1)
         .findLastIndex((medicion) => medicion.tiempo.slice(11, 13) === "00")
     );
-    estaciones = mediciones.slice(indiceInicioDia, indiceInicioDia + 24);
-    variaciones = mediciones.slice(Math.max(0, indiceInicioDia - 24), indiceInicioDia);
-    variaciones = calcularVariaciones(variaciones);
+    estaciones = calcularVariaciones(
+      mediciones.slice(indiceInicioDia, indiceInicioDia + 24)
+    );
+    variaciones = calcularVariaciones(
+      mediciones.slice(Math.max(0, indiceInicioDia - 24), indiceInicioDia)
+    );
     actualizarEstadoConexion("vivo");
     document.querySelector("#fuente-label").textContent = "Open-Meteo · Santiago";
     document.querySelector("#actualizacion-label").textContent =
@@ -135,8 +145,8 @@ async function cargarDatosVivos() {
 }
 
 async function cargarRespaldoLocal() {
-  estaciones = crearRespaldoClimatico();
-  variaciones = calcularVariaciones(estaciones);
+  estaciones = calcularVariaciones(crearRespaldoClimatico());
+  variaciones = estaciones;
   actualizarEstadoConexion("respaldo");
   document.querySelector("#fuente-label").textContent = "Datos sintéticos · respaldo";
   document.querySelector("#actualizacion-label").textContent = "sin conexión";
@@ -211,17 +221,15 @@ function calcularIntensidadTemperatura(estacion) {
 
 function proyectarGeograficamente(estacionesSeleccionadas) {
   const radio = 6;
-  const centros = { am: -8, pm: 8 };
 
   return estacionesSeleccionadas.map((estacion) => {
     const hora = Number(estacion.tiempo?.slice(11, 13) ?? 0);
-    const periodo = hora < 12 ? "am" : "pm";
     const horaReloj = hora % 12;
     const angulo = (horaReloj / 12) * Math.PI * 2 - Math.PI / 2;
 
     return {
       ...estacion,
-      x: centros[periodo] + Math.cos(angulo) * radio,
+      x: Math.cos(angulo) * radio,
       z: Math.sin(angulo) * radio,
     };
   });
@@ -250,7 +258,10 @@ function ordenarPorTemperatura(estacionesSeleccionadas) {
 function generarRepresentacion() {
   limpiarRepresentacion();
 
-  const seleccion = seleccionarEstaciones(estaciones, parametros.cantidad);
+  const seleccion = seleccionarEstaciones(estaciones).filter((estacion) => {
+    const hora = Number(estacion.tiempo?.slice(11, 13) ?? 0);
+    return (hora < 12 ? "am" : "pm") === periodoVisible;
+  });
 
   const distribuidas =
     parametros.modo === "temporal"
@@ -264,27 +275,52 @@ function generarRepresentacion() {
     const riesgoPromedio =
       variaciones.reduce((total, medicion) => total + medicion.riesgoMigrana, 0) /
       variaciones.length;
-    crearModuloEstacion(
-      {
-        ...variaciones[variaciones.length - 1],
-        nombre: "Riesgo promedio 24 h",
-        riesgoMigrana: riesgoPromedio,
-        x: 0,
-        z: 0,
-      },
-      grupoVariaciones,
-      true,
-      true
-    );
+    crearGraficoRiesgo(riesgoPromedio);
   }
 }
 
-function seleccionarEstaciones(lista, cantidad) {
+function crearGraficoRiesgo(riesgo) {
+  const grupo = new THREE.Group();
+  const riesgoNormalizado = Math.min(100, Math.max(0, riesgo)) / 100;
+  const radio = 2.3;
+
+  [
+    { inicio: -Math.PI / 2, proporcion: riesgoNormalizado, color: 0xe48b57 },
+    {
+      inicio: -Math.PI / 2 + riesgoNormalizado * Math.PI * 2,
+      proporcion: 1 - riesgoNormalizado,
+      color: 0x34383e,
+    },
+  ].forEach(({ inicio, proporcion, color }) => {
+    if (proporcion <= 0) return;
+    const sector = new THREE.Mesh(
+      new THREE.CircleGeometry(radio, 48, inicio, proporcion * Math.PI * 2),
+      new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide })
+    );
+    sector.rotation.x = -Math.PI / 2;
+    sector.position.y = 0.08;
+    grupo.add(sector);
+  });
+
+  const etiqueta = crearEtiquetaSuelo(
+    `Riesgo ${riesgo.toFixed(1)}%`,
+    0,
+    0,
+    22,
+    3.8,
+    0.9
+  );
+  etiqueta.position.y = 0.35;
+  grupo.add(etiqueta);
+  grupoVariaciones.add(grupo);
+}
+
+function seleccionarEstaciones(lista) {
   // Elegimos un conjunto estable y suficientemente representativo.
   // Ordenar por capacidad evita que el subconjunto dependa del orden arbitrario del feed.
-  return [...lista]
-    .sort((a, b) => new Date(a.tiempo ?? 0) - new Date(b.tiempo ?? 0))
-    .slice(0, cantidad);
+  return [...lista].sort(
+    (a, b) => new Date(a.tiempo ?? 0) - new Date(b.tiempo ?? 0)
+  );
 }
 
 function crearModuloEstacion(
@@ -301,7 +337,10 @@ function crearModuloEstacion(
     ? 5
     : esVariacion
       ? Math.max(0.3, estacion.riesgoMigrana * parametros.escalaAltura / 20)
-      : Math.max(1.4, (estacion.temperatura + 5) * parametros.escalaAltura);
+        : Math.max(
+          parametros.escalaAltura,
+          Math.abs(estacion.temperatura) * parametros.escalaAltura
+        );
 
   // REGLA 2:
   // bicicletas disponibles → fracción llena.
@@ -311,11 +350,7 @@ function crearModuloEstacion(
     alturaTotal * ((estacion.riesgoMigrana ?? 100) / 100)
   );
 
-  // REGLA 3:
-  // porcentaje de ocupación → ancho del módulo.
-  const ancho =
-    (0.55 + (estacion.humedad / 100) * 0.75) *
-    parametros.escalaAncho;
+  const ancho = 1.05;
 
   const grupo = new THREE.Group();
   grupo.position.set(estacion.x, 0, estacion.z);
@@ -334,6 +369,24 @@ function crearModuloEstacion(
   capacidad.position.y = alturaTotal / 2;
   capacidad.userData.estacion = estacion;
   grupo.add(capacidad);
+
+  if (!esVariacion) {
+    const materialDivision = new THREE.MeshBasicMaterial({
+      color: 0x0b0b0c,
+      transparent: true,
+      opacity: 0.75,
+    });
+
+    const gradosTotales = Math.max(1, Math.ceil(Math.abs(estacion.temperatura)));
+    for (let grado = 1; grado < gradosTotales; grado += 1) {
+      const division = new THREE.Mesh(
+        new THREE.BoxGeometry(ancho * 1.01, 0.035, ancho * 1.01),
+        materialDivision
+      );
+      division.position.y = grado * parametros.escalaAltura;
+      grupo.add(division);
+    }
+  }
 
   // Volumen claro: representa las bicicletas actualmente disponibles.
   const geometriaBicicletas = new THREE.BoxGeometry(
@@ -360,6 +413,16 @@ function crearModuloEstacion(
   grupo.add(bicicletas);
   if (!esVariacion) {
     grupo.add(crearEtiquetaSuelo(estacion.nombre, 0, 0.82, 18, 1.8, 0.55));
+    const etiquetaTemperatura = crearEtiquetaSuelo(
+      `${estacion.temperatura.toFixed(1)} °C`,
+      0,
+      0,
+      22,
+      2.7,
+      0.9
+    );
+    etiquetaTemperatura.position.y = alturaTotal + 0.65;
+    grupo.add(etiquetaTemperatura);
   } else if (esCentral) {
     grupo.add(crearEtiquetaSuelo("Riesgo", 0, 0.82, 18, 1.8, 0.55));
   }
@@ -435,8 +498,16 @@ function actualizarBaseGeografica(estacionesDistribuidas) {
   grupoBaseGeografica.add(
     crearEtiquetaSuelo("tiempo → / temperatura ↑", minX, maxZ + 1.9, 28)
   );
-  grupoBaseGeografica.add(crearEtiquetaSuelo("AM", -8, 0, 48, 4.5, 1.7));
-  grupoBaseGeografica.add(crearEtiquetaSuelo("PM", 8, 0, 48, 4.5, 1.7));
+  const etiquetaPeriodo = crearEtiquetaSuelo(
+    periodoVisible.toUpperCase(),
+    0,
+    0,
+    48,
+    4.5,
+    1.7
+  );
+  etiquetaPeriodo.position.y = 3;
+  grupoBaseGeografica.add(etiquetaPeriodo);
 }
 
 function limpiarBaseGeografica() {
@@ -507,11 +578,13 @@ renderer.domElement.addEventListener("pointerdown", (event) => {
 
 function mostrarEstacion(estacion) {
   document.querySelector("#estacion-nombre").textContent = estacion.nombre;
-  document.querySelector("#m-bicis").textContent = `${estacion.temperatura.toFixed(1)} °C`;
-  document.querySelector("#m-libres").textContent = `${estacion.humedad}%`;
-  document.querySelector("#m-capacidad").textContent = `${estacion.lluvia.toFixed(1)} mm`;
-  document.querySelector("#m-ocupacion").textContent =
+  document.querySelector("#m-temperatura").textContent = `${estacion.temperatura.toFixed(1)} °C`;
+  document.querySelector("#m-humedad").textContent = `${estacion.humedad}%`;
+  document.querySelector("#m-lluvia").textContent = `${estacion.lluvia.toFixed(1)} mm`;
+  document.querySelector("#m-viento").textContent =
     `${estacion.viento.toFixed(1)} km/h`;
+  document.querySelector("#m-riesgo").textContent =
+    `${(estacion.riesgoMigrana ?? 0).toFixed(1)}%`;
 }
 
 document.querySelector("#modo-distribucion").addEventListener("change", (event) => {
@@ -520,8 +593,6 @@ document.querySelector("#modo-distribucion").addEventListener("change", (event) 
 });
 
 conectarSlider("escala-altura", "escala-altura-valor", "escalaAltura", 2);
-conectarSlider("escala-ancho", "escala-ancho-valor", "escalaAncho", 2);
-conectarSlider("cantidad", "cantidad-valor", "cantidad", 0);
 
 function conectarSlider(idControl, idValor, parametro, decimales) {
   const control = document.querySelector(`#${idControl}`);
