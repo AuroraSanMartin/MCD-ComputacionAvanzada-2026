@@ -12,7 +12,7 @@ const INTERVALO_ACTUALIZACION = 15; // segundos.
 
 const parametros = {
   modo: "temporal",
-  escalaAltura: 0.5,
+  escalaAltura: 0.2,
 };
 
 let actualizacionAutomatica = true;
@@ -158,7 +158,7 @@ function convertirDatosClima(datos) {
   const horas = datos.hourly?.time ?? [];
   return horas.map((tiempo, indice) => ({
     id: `santiago-${indice}`,
-    nombre: formatearHora(tiempo),
+    nombre: formatearHoraTorre(tiempo),
     tiempo,
     temperatura: datos.hourly.temperature_2m[indice],
     humedad: datos.hourly.relative_humidity_2m[indice],
@@ -193,7 +193,7 @@ function crearRespaldoClimatico() {
 
     return {
       id: `respaldo-${indice}`,
-      nombre: formatearHora(tiempo),
+      nombre: formatearHoraTorre(tiempo),
       tiempo,
       temperatura: 9 + Math.sin((indice / 24) * Math.PI * 2) * 5,
       humedad: 72 - Math.sin((indice / 24) * Math.PI * 2) * 18,
@@ -220,7 +220,12 @@ function calcularIntensidadTemperatura(estacion) {
 }
 
 function proyectarGeograficamente(estacionesSeleccionadas) {
-  const radio = 6;
+  const anchoTorre = 1.05;
+  const separacion = anchoTorre * 0.2;
+  const anguloEntreTorres = Math.PI / Math.max(1, estacionesSeleccionadas.length);
+  const radio = estacionesSeleccionadas.length > 1
+    ? (anchoTorre + separacion) / (2 * Math.sin(anguloEntreTorres))
+    : 0;
 
   return estacionesSeleccionadas.map((estacion) => {
     const hora = Number(estacion.tiempo?.slice(11, 13) ?? 0);
@@ -271,10 +276,10 @@ function generarRepresentacion() {
   actualizarBaseGeografica(distribuidas);
   distribuidas.forEach((medicion) => crearModuloEstacion(medicion));
 
-  if (variaciones.length > 0) {
+  if (seleccion.length > 0) {
     const riesgoPromedio =
-      variaciones.reduce((total, medicion) => total + medicion.riesgoMigrana, 0) /
-      variaciones.length;
+      seleccion.reduce((total, medicion) => total + medicion.riesgoMigrana, 0) /
+      seleccion.length;
     crearGraficoRiesgo(riesgoPromedio);
   }
 }
@@ -282,7 +287,7 @@ function generarRepresentacion() {
 function crearGraficoRiesgo(riesgo) {
   const grupo = new THREE.Group();
   const riesgoNormalizado = Math.min(100, Math.max(0, riesgo)) / 100;
-  const radio = 2.3;
+  const radio = (2.3 / 3) * 2;
 
   [
     { inicio: -Math.PI / 2, proporcion: riesgoNormalizado, color: 0xe48b57 },
@@ -323,6 +328,26 @@ function seleccionarEstaciones(lista) {
   );
 }
 
+function crearGeometriaTrapecio(ancho, altura) {
+  const profundidad = 1.8;
+  const mitadInterior = ancho * 0.32;
+  const mitadExterior = ancho * 2 * 1.015 * 0.5;
+  const forma = new THREE.Shape();
+
+  forma.moveTo(-mitadExterior, -profundidad / 2);
+  forma.lineTo(mitadExterior, -profundidad / 2);
+  forma.lineTo(mitadInterior, profundidad / 2);
+  forma.lineTo(-mitadInterior, profundidad / 2);
+  forma.closePath();
+
+  const geometria = new THREE.ExtrudeGeometry(forma, {
+    depth: altura,
+    bevelEnabled: false,
+  });
+  geometria.rotateX(-Math.PI / 2);
+  return geometria;
+}
+
 function crearModuloEstacion(
   estacion,
   grupoDestino = grupoEstaciones,
@@ -354,45 +379,13 @@ function crearModuloEstacion(
 
   const grupo = new THREE.Group();
   grupo.position.set(estacion.x, 0, estacion.z);
+  grupo.rotation.y = Math.atan2(estacion.x, estacion.z);
   grupo.userData.estacion = estacion;
 
-  // Contenedor: representa la capacidad total.
-  const geometriaCapacidad = new THREE.BoxGeometry(ancho, alturaTotal, ancho);
-  const materialCapacidad = new THREE.MeshStandardMaterial({
-    color: esVariacion ? 0xe48b57 : 0x34383e,
-    roughness: 0.9,
-    transparent: true,
-    opacity: esVariacion ? (esCentral ? 0.32 : 1) : 0.55,
-  });
-
-  const capacidad = new THREE.Mesh(geometriaCapacidad, materialCapacidad);
-  capacidad.position.y = alturaTotal / 2;
-  capacidad.userData.estacion = estacion;
-  grupo.add(capacidad);
-
-  if (!esVariacion) {
-    const materialDivision = new THREE.MeshBasicMaterial({
-      color: 0x0b0b0c,
-      transparent: true,
-      opacity: 0.75,
-    });
-
-    const gradosTotales = Math.max(1, Math.ceil(Math.abs(estacion.temperatura)));
-    for (let grado = 1; grado < gradosTotales; grado += 1) {
-      const division = new THREE.Mesh(
-        new THREE.BoxGeometry(ancho * 1.01, 0.035, ancho * 1.01),
-        materialDivision
-      );
-      division.position.y = grado * parametros.escalaAltura;
-      grupo.add(division);
-    }
-  }
-
   // Volumen claro: representa las bicicletas actualmente disponibles.
-  const geometriaBicicletas = new THREE.BoxGeometry(
+  const geometriaBicicletas = crearGeometriaTrapecio(
     ancho * 0.72,
-    esVariacion ? alturaRiesgo : alturaBicicletas,
-    ancho * 0.72
+    esVariacion ? alturaRiesgo : alturaBicicletas
   );
   const colorTemperatura = esVariacion
     ? new THREE.Color(0xe48b57)
@@ -407,12 +400,24 @@ function crearModuloEstacion(
   });
 
   const bicicletas = new THREE.Mesh(geometriaBicicletas, materialBicicletas);
-  bicicletas.position.y = (esVariacion ? alturaRiesgo : alturaBicicletas) / 2;
   bicicletas.castShadow = true;
   bicicletas.userData.estacion = estacion;
   grupo.add(bicicletas);
   if (!esVariacion) {
-    grupo.add(crearEtiquetaSuelo(estacion.nombre, 0, 0.82, 18, 1.8, 0.55));
+    const puntosSegmentos = [];
+    const gradosTotales = Math.floor(Math.abs(estacion.temperatura));
+    for (let grado = 1; grado <= gradosTotales; grado += 1) {
+      puntosSegmentos.push(
+        new THREE.Vector3(-ancho * 0.22, grado * parametros.escalaAltura, 0.9 + 0.03),
+        new THREE.Vector3(ancho * 0.22, grado * parametros.escalaAltura, 0.9 + 0.03)
+      );
+    }
+    const segmento = new THREE.LineSegments(
+      new THREE.BufferGeometry().setFromPoints(puntosSegmentos),
+      new THREE.LineBasicMaterial({ color: 0xd9d2c3 })
+    );
+    grupo.add(segmento);
+    grupo.add(crearEtiquetaSuelo(estacion.nombre, 0, 1.2, 30, 2.4, 0.8));
     const etiquetaTemperatura = crearEtiquetaSuelo(
       `${estacion.temperatura.toFixed(1)} °C`,
       0,
@@ -428,7 +433,7 @@ function crearModuloEstacion(
   }
 
   grupoDestino.add(grupo);
-  objetosEstacion.push(capacidad, bicicletas);
+  objetosEstacion.push(bicicletas);
 }
 
 function limpiarRepresentacion() {
@@ -644,6 +649,19 @@ function formatearHora(timestamp) {
     minute: "2-digit",
     second: "2-digit",
   });
+}
+
+function formatearHoraTorre(timestamp) {
+  if (!timestamp) return "--";
+
+  const fecha = typeof timestamp === "number"
+    ? new Date(timestamp * 1000)
+    : new Date(timestamp);
+
+  return fecha.toLocaleTimeString("es-CL", {
+    hour: "2-digit",
+    hour12: false,
+  }).replace(/^0/, "");
 }
 
 // ======================================================
