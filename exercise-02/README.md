@@ -8,7 +8,7 @@ representa una hora: la altura y el color corresponden a la temperatura, el
 ancho representa la humedad relativa y el inspector muestra lluvia y viento.
 
 Para ejecutarla, abre `index.html` con Live Server. Si no hay conexión, se usa
-una serie climática sintética de respaldo.
+una serie climática sintética de respaldo..
 
 ## Riesgo estimado
 
