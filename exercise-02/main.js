@@ -11,7 +11,6 @@ const URL_CLIMA =
 const INTERVALO_ACTUALIZACION = 15; // segundos.
 
 const parametros = {
-  modo: "temporal",
   escalaAltura: 0.2,
 };
 
@@ -21,6 +20,7 @@ let estaciones = [];
 let variaciones = [];
 let objetosEstacion = [];
 let periodoVisible = "am";
+let estacionSeleccionada = null;
 
 // ======================================================
 // 02 — ESCENA
@@ -132,6 +132,8 @@ async function cargarDatosVivos() {
     variaciones = calcularVariaciones(
       mediciones.slice(Math.max(0, indiceInicioDia - 24), indiceInicioDia)
     );
+    seleccionarHoraActual(estaciones);
+    actualizarCambioTemperatura24h(variaciones);
     actualizarEstadoConexion("vivo");
     document.querySelector("#fuente-label").textContent = "Open-Meteo · Santiago";
     document.querySelector("#actualizacion-label").textContent =
@@ -147,6 +149,8 @@ async function cargarDatosVivos() {
 async function cargarRespaldoLocal() {
   estaciones = calcularVariaciones(crearRespaldoClimatico());
   variaciones = estaciones;
+  seleccionarHoraActual(estaciones);
+  actualizarCambioTemperatura24h(variaciones);
   actualizarEstadoConexion("respaldo");
   document.querySelector("#fuente-label").textContent = "Datos sintéticos · respaldo";
   document.querySelector("#actualizacion-label").textContent = "sin conexión";
@@ -185,6 +189,36 @@ function calcularVariaciones(mediciones) {
 function calcularRiesgoMigrana(cambioTemperatura) {
   const porcentajePorGrado = cambioTemperatura < 0 ? 24 / 5 : 19 / 5;
   return Math.min(100, Math.abs(cambioTemperatura) * porcentajePorGrado);
+}
+
+function seleccionarHoraActual(mediciones) {
+  if (mediciones.length === 0) return;
+
+  const ahora = Date.now();
+  estacionSeleccionada = mediciones.reduce((cercana, medicion) => {
+    const distanciaActual = Math.abs(new Date(medicion.tiempo).getTime() - ahora);
+    const distanciaCercana = Math.abs(new Date(cercana.tiempo).getTime() - ahora);
+    return distanciaActual < distanciaCercana ? medicion : cercana;
+  });
+  const hora = Number(estacionSeleccionada.tiempo?.slice(11, 13) ?? 0);
+  periodoVisible = hora < 12 ? "am" : "pm";
+  botonPeriodo.textContent = periodoVisible === "am" ? "Mostrar PM" : "Mostrar AM";
+  botonPeriodo.setAttribute("aria-pressed", String(periodoVisible === "pm"));
+}
+
+function actualizarCambioTemperatura24h(mediciones) {
+  const etiqueta = document.querySelector("#cambio-24h-label");
+
+  if (mediciones.length === 0) {
+    etiqueta.textContent = "—";
+    return;
+  }
+
+  const temperaturas = mediciones.map((medicion) => medicion.temperatura);
+  const maxima = Math.max(...temperaturas);
+  const minima = Math.min(...temperaturas);
+  const cambioTotal = maxima - minima;
+  etiqueta.textContent = `${cambioTotal.toFixed(1)} °C (${maxima.toFixed(1)} - ${minima.toFixed(1)})`;
 }
 
 function crearRespaldoClimatico() {
@@ -240,26 +274,6 @@ function proyectarGeograficamente(estacionesSeleccionadas) {
   });
 }
 
-function ordenarPorTemperatura(estacionesSeleccionadas) {
-  const ordenadas = [...estacionesSeleccionadas].sort(
-    (a, b) => b.temperatura - a.temperatura
-  );
-
-  const columnas = Math.ceil(Math.sqrt(ordenadas.length));
-  const separacion = 2.0;
-
-  return ordenadas.map((estacion, indice) => {
-    const columna = indice % columnas;
-    const fila = Math.floor(indice / columnas);
-
-    return {
-      ...estacion,
-      x: (columna - columnas / 2) * separacion,
-      z: (fila - columnas / 2) * separacion,
-    };
-  });
-}
-
 function generarRepresentacion() {
   limpiarRepresentacion();
 
@@ -268,19 +282,18 @@ function generarRepresentacion() {
     return (hora < 12 ? "am" : "pm") === periodoVisible;
   });
 
-  const distribuidas =
-    parametros.modo === "temporal"
-      ? proyectarGeograficamente(seleccion)
-      : ordenarPorTemperatura(seleccion);
+  const distribuidas = proyectarGeograficamente(seleccion);
 
   actualizarBaseGeografica(distribuidas);
   distribuidas.forEach((medicion) => crearModuloEstacion(medicion));
 
   if (seleccion.length > 0) {
-    const riesgoPromedio =
-      seleccion.reduce((total, medicion) => total + medicion.riesgoMigrana, 0) /
-      seleccion.length;
-    crearGraficoRiesgo(riesgoPromedio);
+    const seleccionActual = seleccion.includes(estacionSeleccionada)
+      ? estacionSeleccionada
+      : seleccion[0];
+    estacionSeleccionada = seleccionActual;
+    mostrarEstacion(seleccionActual);
+    crearGraficoRiesgo(seleccionActual.riesgoMigrana);
   }
 }
 
@@ -455,7 +468,7 @@ function limpiarRepresentacion() {
 
 function actualizarBaseGeografica(estacionesDistribuidas) {
   limpiarBaseGeografica();
-  grupoBaseGeografica.visible = parametros.modo === "temporal";
+  grupoBaseGeografica.visible = true;
 
   if (!grupoBaseGeografica.visible || estacionesDistribuidas.length === 0) return;
 
@@ -577,7 +590,11 @@ renderer.domElement.addEventListener("pointerdown", (event) => {
   const intersecciones = raycaster.intersectObjects(objetosEstacion, false);
 
   if (intersecciones.length > 0) {
-    mostrarEstacion(intersecciones[0].object.userData.estacion);
+    const estacion = intersecciones[0].object.userData.estacion;
+    estacionSeleccionada = estacion;
+    mostrarEstacion(estacion);
+    limpiarGrupo(grupoVariaciones);
+    crearGraficoRiesgo(estacion.riesgoMigrana);
   }
 });
 
@@ -591,11 +608,6 @@ function mostrarEstacion(estacion) {
   document.querySelector("#m-riesgo").textContent =
     `${(estacion.riesgoMigrana ?? 0).toFixed(1)}%`;
 }
-
-document.querySelector("#modo-distribucion").addEventListener("change", (event) => {
-  parametros.modo = event.target.value;
-  generarRepresentacion();
-});
 
 conectarSlider("escala-altura", "escala-altura-valor", "escalaAltura", 2);
 

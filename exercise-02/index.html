@@ -61,18 +61,14 @@
           <span>Próxima consulta</span>
           <strong id="cuenta-regresiva">—</strong>
         </div>
+        <div class="status-row">
+          <span>Cambio últimas 24 h</span>
+          <strong id="cambio-24h-label">—</strong>
+        </div>
       </section>
 
       <section class="control-group">
         <h3>Representación</h3>
-
-        <label class="select-label">
-          <span>Distribución</span>
-          <select id="modo-distribucion">
-            <option value="temporal">Dos relojes · AM / PM</option>
-            <option value="temperatura">Ordenada · temperatura</option>
-          </select>
-        </label>
 
         <label>
           <span>Escala vertical</span>
@@ -80,15 +76,6 @@
           <input id="escala-altura" type="range" min="0.05" max="0.8" step="0.01" value="0.5" />
         </label>
 
-      </section>
-
-      <section class="mapping">
-        <h3>Reglas de representación</h3>
-        <div class="map-row"><b>hora</b><span>→</span><em>posición X/Z</em></div>
-        <div class="map-row"><b>temperatura</b><span>→</span><em>altura</em></div>
-        <div class="map-row"><b>humedad relativa</b><span>→</span><em>dato del inspector</em></div>
-        <div class="map-row"><b>cambio térmico</b><span>→</span><em>riesgo estimado</em></div>
-        <div class="map-row"><b>torre transparente</b><span>→</span><em>100% de riesgo</em></div>
       </section>
 
       <section class="inspector">
