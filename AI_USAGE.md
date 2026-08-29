@@ -67,3 +67,13 @@ Copilot
 
 **Qué cambió en el proyecto:**  
 Se fijó el ancho de las torres, se muestran todas las horas disponibles, y cada torre incorpora divisiones por grado Celsius y una etiqueta de temperatura. El riesgo de migraña ahora se calcula también para las estaciones visibles y aparece en el inspector.
+
+### 29-08-2026 - Exercise-02
+
+**Herramienta / agente:**  
+Copilot
+**Qué pedí:**
+"Agrégalo. También agrega un bloque junto a la información de la derecha que diga los decibeles actuales y cuánto tiempo con la cantidad de decibeles actuales puede ser peligroso."
+
+**Qué cambió en el proyecto:**  
+Se incorporó un medidor de sonido en el panel derecho con acceso al micrófono del navegador, lectura en tiempo real de nivel de ruido, una barra visual y un cálculo estimado de tiempo de exposición peligroso según el nivel actual. La interfaz conserva el estilo del ejercicio y se integra al panel de información del clima.

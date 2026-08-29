@@ -48,6 +48,8 @@ viewport.appendChild(renderer.domElement);
 
 const controlesOrbita = new OrbitControls(camara, renderer.domElement);
 controlesOrbita.enableDamping = true;
+controlesOrbita.minDistance = 10;
+controlesOrbita.maxDistance = 28;
 controlesOrbita.target.set(0, 2, 0);
 
 escena.add(new THREE.HemisphereLight(0xf2eee4, 0x1f2228, 1.8));
@@ -65,10 +67,6 @@ suelo.rotation.x = -Math.PI / 2;
 suelo.position.y = -0.02;
 suelo.receiveShadow = true;
 escena.add(suelo);
-
-const grilla = new THREE.GridHelper(70, 70, 0x34383d, 0x1e2024);
-grilla.position.y = 0.001;
-escena.add(grilla);
 
 const grupoEstaciones = new THREE.Group();
 escena.add(grupoEstaciones);
@@ -294,6 +292,7 @@ function generarRepresentacion() {
     estacionSeleccionada = seleccionActual;
     mostrarEstacion(seleccionActual);
     crearGraficoRiesgo(seleccionActual.riesgoMigrana);
+    resaltarEstacionSeleccionada();
   }
 }
 
@@ -468,64 +467,9 @@ function limpiarRepresentacion() {
 
 function actualizarBaseGeografica(estacionesDistribuidas) {
   limpiarBaseGeografica();
-  grupoBaseGeografica.visible = true;
+  grupoBaseGeografica.visible = false;
 
-  if (!grupoBaseGeografica.visible || estacionesDistribuidas.length === 0) return;
-
-  const xs = estacionesDistribuidas.map((estacion) => estacion.x);
-  const zs = estacionesDistribuidas.map((estacion) => estacion.z);
-  const minX = Math.min(...xs);
-  const maxX = Math.max(...xs);
-  const minZ = Math.min(...zs);
-  const maxZ = Math.max(...zs);
-  const ancho = maxX - minX;
-  const profundidad = maxZ - minZ;
-  const largoFlecha = Math.max(4, Math.min(ancho, profundidad) * 0.28);
-  const xGuia = minX - 3.2;
-  const zInicio = maxZ;
-  const zFinal = zInicio - largoFlecha;
-
-  const materialGuia = new THREE.LineBasicMaterial({
-    color: 0xd9d2c3,
-    transparent: true,
-    opacity: 0.5,
-  });
-
-  const flecha = new THREE.Line(
-    new THREE.BufferGeometry().setFromPoints([
-      new THREE.Vector3(xGuia, 0.04, zInicio),
-      new THREE.Vector3(xGuia, 0.04, zFinal),
-    ]),
-    materialGuia
-  );
-
-  const cabeza = new THREE.Mesh(
-    new THREE.ConeGeometry(0.42, 1.1, 3),
-    new THREE.MeshBasicMaterial({
-      color: 0xd9d2c3,
-      transparent: true,
-      opacity: 0.55,
-    })
-  );
-  cabeza.rotation.x = Math.PI / 2;
-  cabeza.rotation.z = Math.PI;
-  cabeza.position.set(xGuia, 0.06, zFinal - 0.46);
-
-  grupoBaseGeografica.add(flecha, cabeza);
-  grupoBaseGeografica.add(crearEtiquetaSuelo("N", xGuia, zFinal - 1.45, 42));
-  grupoBaseGeografica.add(
-    crearEtiquetaSuelo("tiempo → / temperatura ↑", minX, maxZ + 1.9, 28)
-  );
-  const etiquetaPeriodo = crearEtiquetaSuelo(
-    periodoVisible.toUpperCase(),
-    0,
-    0,
-    48,
-    4.5,
-    1.7
-  );
-  etiquetaPeriodo.position.y = 3;
-  grupoBaseGeografica.add(etiquetaPeriodo);
+  if (estacionesDistribuidas.length === 0) return;
 }
 
 function limpiarBaseGeografica() {
@@ -595,6 +539,7 @@ renderer.domElement.addEventListener("pointerdown", (event) => {
     mostrarEstacion(estacion);
     limpiarGrupo(grupoVariaciones);
     crearGraficoRiesgo(estacion.riesgoMigrana);
+    resaltarEstacionSeleccionada();
   }
 });
 
@@ -607,6 +552,34 @@ function mostrarEstacion(estacion) {
     `${estacion.viento.toFixed(1)} km/h`;
   document.querySelector("#m-riesgo").textContent =
     `${(estacion.riesgoMigrana ?? 0).toFixed(1)}%`;
+}
+
+function resaltarEstacionSeleccionada() {
+  if (!estacionSeleccionada) return;
+
+  objetosEstacion.forEach((objeto) => {
+    const esSeleccionado = objeto.userData.estacion?.id === estacionSeleccionada.id;
+
+    if (objeto.userData.outline) {
+      objeto.parent.remove(objeto.userData.outline);
+      objeto.userData.outline.geometry.dispose();
+      objeto.userData.outline.material.dispose();
+      objeto.userData.outline = null;
+    }
+
+    if (esSeleccionado) {
+      const contorno = new THREE.LineSegments(
+        new THREE.EdgesGeometry(objeto.geometry),
+        new THREE.LineBasicMaterial({
+          color: 0xffffff,
+          transparent: false,
+        })
+      );
+      contorno.position.set(0, 0.02, 0);
+      objeto.parent.add(contorno);
+      objeto.userData.outline = contorno;
+    }
+  });
 }
 
 conectarSlider("escala-altura", "escala-altura-valor", "escalaAltura", 2);
