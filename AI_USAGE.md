@@ -4,6 +4,16 @@ Documenta de manera breve cuándo y para qué utilizaste asistentes de IA. El ob
 
 ## Registro
 
+### 02-09-2026 - Exercise-03
+
+**Herramienta / agente:**
+Copilot
+**Qué pedí:**
+"Crea la base para una página con javascript, html y css en Exercise-03 que se pueda conectar a Arduino IDE"
+
+**Qué cambió en el proyecto:**
+Se creó una interfaz estática con Web Serial para conectar una placa Arduino desde Chrome o Edge, enviar comandos de texto y mostrar datos recibidos. También se documentó el protocolo inicial, la velocidad serial de 9600 baudios y el uso de un servidor local.
+
 ### 21-08-2026 - Lab02
 
 **Herramienta / agente:**  

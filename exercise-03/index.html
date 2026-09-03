@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Base de comunicación serial entre una interfaz web y Arduino." />
+  <title>Exercise 03 | Puente serial</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <section class="hero-panel">
+      <header class="project-header">
+        <p class="eyebrow">COMPUTACIÓN AVANZADA · EXERCISE 03</p>
+        <h1>Puente serial</h1>
+        <p class="subtitle">Base para enviar comandos desde el navegador y recibir datos desde Arduino.</p>
+      </header>
+
+      <div class="charts" aria-live="polite">
+        <article class="chart-card">
+          <div class="chart-heading"><h2>Perfume</h2><strong id="alcohol135-value">---</strong></div>
+          <p>Lectura de alcohol135 · A0</p>
+          <canvas id="alcohol135-chart" aria-label="Gráfico de lectura de alcohol135"></canvas>
+        </article>
+        <article class="chart-card">
+          <div class="chart-heading"><h2>Monóxido de carbono</h2><strong id="co9-value">---</strong></div>
+          <p>Lectura de CO9 · A1</p>
+          <canvas id="co9-chart" aria-label="Gráfico de lectura de CO9"></canvas>
+        </article>
+        <article class="chart-card chart-card-wide">
+          <div class="chart-heading"><h2>Calidad del aire</h2><strong id="air-quality-value">---</strong></div>
+          <p>Suma de alcohol135 + CO9</p>
+          <canvas id="air-quality-chart" aria-label="Gráfico de calidad del aire"></canvas>
+        </article>
+      </div>
+
+      <div class="protocol-note">
+        <span class="protocol-index">01</span>
+        <p>Arduino envía una muestra cada 500 ms. La página conserva los últimos 60 puntos y calcula la suma de ambas lecturas.</p>
+      </div>
+    </section>
+
+    <aside class="controls-panel">
+      <header class="panel-header">
+        <p class="eyebrow">SERIAL MONITOR</p>
+        <h2>Control de placa</h2>
+      </header>
+
+      <section class="connection-section">
+        <div class="status-row">
+          <span><i id="status-dot" class="status-dot"></i><span id="connection-status">Desconectado</span></span>
+          <span id="port-label">Sin puerto</span>
+        </div>
+        <button id="connect-button" type="button">Conectar Arduino</button>
+        <p id="browser-note" class="support-note"></p>
+      </section>
+
+      <section class="control-group">
+        <h3>Salida de prueba</h3>
+        <div class="control-row">
+          <label for="output-value">Valor</label>
+          <output id="output-value-label" for="output-value">50</output>
+        </div>
+        <input id="output-value" type="range" min="0" max="100" value="50" />
+        <button id="send-value-button" class="secondary" type="button" disabled>Enviar valor</button>
+        <div class="button-grid">
+          <button id="on-button" class="secondary" type="button" disabled>Encender</button>
+          <button id="off-button" class="secondary" type="button" disabled>Apagar</button>
+        </div>
+      </section>
+
+      <section class="command-section">
+        <h3>Comando manual</h3>
+        <form id="command-form">
+          <label class="visually-hidden" for="command-input">Comando serial</label>
+          <div class="command-entry">
+            <input id="command-input" type="text" placeholder="Ej: SENSOR?" autocomplete="off" />
+            <button type="submit" disabled>Enviar</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="log-section">
+        <div class="log-header">
+          <h3>Registro</h3>
+          <button id="clear-log-button" class="text-button" type="button">Limpiar</button>
+        </div>
+        <div id="serial-log" class="serial-log" role="log" aria-live="polite" aria-label="Registro serial">
+          <p class="log-empty">Los eventos aparecerán aquí.</p>
+        </div>
+      </section>
+    </aside>
+  </main>
+
+  <script src="./main.js"></script>
+</body>
+</html>
