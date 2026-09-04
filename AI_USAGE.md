@@ -9,6 +9,86 @@ Documenta de manera breve cuándo y para qué utilizaste asistentes de IA. El ob
 **Herramienta / agente:**
 Copilot
 **Qué pedí:**
+"Mover las lecturas de sensores al lado derecho y agruparlas de a dos"
+
+**Qué cambió en el proyecto:**
+Las lecturas numéricas se movieron al panel derecho y se organizaron como Perfume/CO9, OjoIzq/OjoDer y OidoIzq/OidoDer. La suma de calidad del aire queda como valor derivado debajo de los pares.
+
+### 04-09-2026 - Exercise-03
+
+**Herramienta / agente:**
+Copilot
+**Qué pedí:**
+"Quitar los gráficos de lecturas y mostrarlas como números enteros actualizados en el panel izquierdo"
+
+**Qué cambió en el proyecto:**
+Se retiraron los tres gráficos de lecturas y su código de dibujo. El panel izquierdo ahora muestra como enteros alcohol135, CO9, OidoIzq, OidoDer, OjoIzq, OjoDer y la suma de calidad del aire.
+
+### 04-09-2026 - Exercise-03
+
+**Herramienta / agente:**
+Copilot
+**Qué pedí:**
+"Cambiar la amplitud de la onda nueva según el cambio de lectura de ambos oídos, sin alterar las ondas existentes"
+
+**Qué cambió en el proyecto:**
+Cada cambio de lectura crea una nueva onda independiente cuya amplitud depende de la diferencia respecto de la lectura anterior. Las ondas que ya están viajando mantienen su amplitud original hasta llegar al centro.
+
+### 04-09-2026 - Exercise-03
+
+**Herramienta / agente:**
+Copilot
+**Qué pedí:**
+"Hacer que las ondas se creen constantemente y no mediante pulsos"
+
+**Qué cambió en el proyecto:**
+Se reemplazó la animación por pulsos reiniciables por una onda continua cuya fase avanza permanentemente hacia el centro del manto.
+
+### 04-09-2026 - Exercise-03
+
+**Herramienta / agente:**
+Copilot
+**Qué pedí:**
+"Amplificar 100 veces más la amplitud de la onda sobre el manto"
+
+**Qué cambió en el proyecto:**
+Se agregó `WAVE_AMPLITUDE_MULTIPLIER = 100` en la visualización Three.js para multiplicar directamente la deformación producida por los sensores auditivos.
+
+### 04-09-2026 - Exercise-03
+
+**Herramienta / agente:**
+Copilot
+**Qué pedí:**
+"Aumentar la sensibilidad del manto e invertir 180 grados el gradiente y las ondas"
+
+**Qué cambió en el proyecto:**
+Se amplificó la respuesta visual a los sensores auditivos, se agregaron pulsos secundarios para un movimiento más alterado y se invirtieron el gradiente vertical y el sentido de propagación de las ondas.
+
+### 04-09-2026 - Exercise-03
+
+**Herramienta / agente:**
+Copilot
+**Qué pedí:**
+"Acostar el manto y hacer que el pulso se siga esparciendo hasta llegar al centro"
+
+**Qué cambió en el proyecto:**
+Se ajustó la cámara Three.js a una vista más horizontal, se aumentó la densidad de la malla y se reemplazó la onda continua por pulsos que avanzan desde cada borde hacia el centro con amplitud decreciente.
+
+### 04-09-2026 - Exercise-03
+
+**Herramienta / agente:**
+Copilot
+**Qué pedí:**
+"Visualizar ambos oídos con un manto Three.js dividido horizontalmente y ondas que se unen en el centro"
+
+**Qué cambió en el proyecto:**
+Se agregó una superficie Three.js que usa OidoIzq y OidoDer para deformar dos ondas opuestas. La onda superior viaja desde la izquierda y la inferior desde la derecha; ambas reducen su amplitud hasta una línea central inmóvil.
+
+### 04-09-2026 - Exercise-03
+
+**Herramienta / agente:**
+Copilot
+**Qué pedí:**
 "Agregar nuevamente dos sensores auditivos análogos en A7 y A6, llamados OidoIzq y OidoDer"
 
 **Qué cambió en el proyecto:**

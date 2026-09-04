@@ -2,7 +2,6 @@ const BAUD_RATE = 9600;
 
 let port = null;
 let reader = null;
-let writer = null;
 let keepReading = false;
 let receivedBuffer = "";
 
@@ -31,14 +30,6 @@ let microphoneFrame = null;
 let microphoneHistory = [];
 let serialAlerts = [];
 let microphoneAlerts = [];
-const chartHistory = [];
-const MAX_POINTS = 60;
-
-const charts = [
-  { canvas: document.querySelector("#alcohol135-chart"), label: "alcohol135", color: "#e6a15c", max: 4095, key: "alcohol135" },
-  { canvas: document.querySelector("#co9-chart"), label: "CO9", color: "#8db99c", max: 4095, key: "co9" },
-  { canvas: document.querySelector("#air-quality-chart"), label: "Calidad del aire", color: "#d87866", max: 8190, key: "sum" },
-];
 
 function setConnectionState(state, message) {
   connectionStatus.textContent = message;
@@ -78,7 +69,6 @@ async function disconnectFromArduino() {
   if (reader) {
     await reader.cancel().catch(() => {});
   }
-  if (writer) writer.releaseLock();
   if (port) await port.close().catch(() => {});
   reader = null;
   writer = null;
@@ -109,10 +99,10 @@ async function startReading() {
 }
 
 function handleReceivedMessage(message) {
-  updateSensorCharts(message);
+  updateSensorReadings(message);
 }
 
-function updateSensorCharts(message) {
+function updateSensorReadings(message) {
   const values = message.match(/alcohol135:(\d+),CO9:(\d+),OidoIzq:(\d+),OidoDer:(\d+),OjoIzq:(\d+),OjoDer:(\d+),ALERTAS:(.*)/i);
   if (!values) return;
 
@@ -124,8 +114,7 @@ function updateSensorCharts(message) {
     ojoIzq: Number(values[5]),
     ojoDer: Number(values[6]),
   };
-  chartHistory.push({ time: new Date(), alcohol135, co9, sum: alcohol135 + co9 });
-  if (chartHistory.length > MAX_POINTS) chartHistory.shift();
+  window.dispatchEvent(new CustomEvent("exercise03:sensors", { detail: sensors }));
   alcohol135Value.textContent = alcohol135;
   co9Value.textContent = co9;
   airQualityValue.textContent = alcohol135 + co9;
@@ -134,7 +123,6 @@ function updateSensorCharts(message) {
   });
   serialAlerts = values[7] === "ninguna" ? [] : values[7].split(";").filter(Boolean);
   renderAlerts();
-  charts.forEach(drawChart);
 }
 
 function renderAlerts() {
@@ -237,64 +225,6 @@ function isMicrophoneFlickering() {
   return directionChanges >= 4;
 }
 
-function drawChart(chart) {
-  const { canvas, color, key, max } = chart;
-  const context = canvas.getContext("2d");
-  const width = canvas.clientWidth;
-  const height = canvas.clientHeight;
-  const ratio = window.devicePixelRatio || 1;
-  canvas.width = width * ratio;
-  canvas.height = height * ratio;
-  context.setTransform(ratio, 0, 0, ratio, 0, 0);
-  context.clearRect(0, 0, width, height);
-
-  const padding = { top: 10, right: 8, bottom: 20, left: 30 };
-  const plotWidth = width - padding.left - padding.right;
-  const plotHeight = height - padding.top - padding.bottom;
-  context.font = "10px Consolas, monospace";
-  context.strokeStyle = "rgba(255, 255, 255, .10)";
-  context.fillStyle = "#777a78";
-  context.lineWidth = 1;
-
-  [0, .5, 1].forEach((step) => {
-    const y = padding.top + plotHeight * (1 - step);
-    context.beginPath();
-    context.moveTo(padding.left, y);
-    context.lineTo(width - padding.right, y);
-    context.stroke();
-    context.fillText(Math.round(max * step), 0, y + 3);
-  });
-
-  if (chartHistory.length === 0) {
-    context.fillText("Esperando datos", padding.left + 8, padding.top + plotHeight / 2);
-    return;
-  }
-
-  const points = chartHistory.map((sample, index) => ({
-    x: padding.left + (chartHistory.length === 1 ? plotWidth / 2 : index * plotWidth / (chartHistory.length - 1)),
-    y: padding.top + plotHeight * (1 - sample[key] / max),
-  }));
-  context.beginPath();
-  points.forEach((point, index) => index === 0 ? context.moveTo(point.x, point.y) : context.lineTo(point.x, point.y));
-  context.strokeStyle = color;
-  context.lineWidth = 2;
-  context.stroke();
-  context.fillStyle = color;
-  points.slice(-1).forEach((point) => {
-    context.beginPath();
-    context.arc(point.x, point.y, 3, 0, Math.PI * 2);
-    context.fill();
-  });
-}
-
-async function sendMessage(message) {
-  if (!port?.writable) return;
-  writer = port.writable.getWriter();
-  await writer.write(new TextEncoder().encode(`${message}\n`));
-  writer.releaseLock();
-  writer = null;
-}
-
 connectButton.addEventListener("click", () => {
   if (port) disconnectFromArduino();
   else connectToArduino();
@@ -305,9 +235,6 @@ microphoneButton.addEventListener("click", toggleMicrophone);
 if (!("serial" in navigator)) {
   browserNote.textContent = "Web Serial no está disponible en este navegador.";
 }
-
-window.addEventListener("resize", () => charts.forEach(drawChart));
-charts.forEach(drawChart);
 
 if ("serial" in navigator) {
   navigator.serial.addEventListener("disconnect", () => {

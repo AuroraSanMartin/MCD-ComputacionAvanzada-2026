@@ -23,7 +23,7 @@ Los sensores analógicos deben conectarse con `VCC` a 5V, `GND` a GND y `AO` al 
 
 El sketch debe leer cada línea y decidir qué hacer con ella. Para enviar datos hacia la página, Arduino debe usar `Serial.println(...)`.
 
-La lectura automática tiene este formato: `alcohol135:345,CO9:512,OidoIzq:800,OidoDer:950,OjoIzq:2100,OjoDer:1900,ALERTAS:ninguna`. La página interpreta ese formato y actualiza los gráficos y las cuatro lecturas laterales.
+La lectura automática tiene este formato: `alcohol135:345,CO9:512,OidoIzq:800,OidoDer:950,OjoIzq:2100,OjoDer:1900,ALERTAS:ninguna`. La página interpreta ese formato, actualiza los gráficos y las cuatro lecturas laterales. El manto Three.js se divide horizontalmente: la onda superior corresponde a `OidoIzq` y viaja desde la izquierda al centro; la inferior corresponde a `OidoDer` y viaja desde la derecha al centro. Ambas reducen su amplitud hacia la línea central, que permanece quieta.
 
 Arduino lee los LDR cada `20 ms` y transmite datos cada `150 ms`. Genera alertas cuando un sensor supera `3600`, cuando hay una diferencia de al menos `1000` entre sensores izquierdos y derechos o cuando detecta al menos 5 cambios alternados de al menos `120` unidades en la iluminación. La página genera una alerta cuando el micrófono supera `75 dB` aproximados o cuando el nivel de sonido cambia de forma rápida y repetitiva.
 
