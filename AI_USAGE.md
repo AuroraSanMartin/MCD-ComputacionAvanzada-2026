@@ -9,6 +9,16 @@ Documenta de manera breve cuándo y para qué utilizaste asistentes de IA. El ob
 **Herramienta / agente:**
 Copilot
 **Qué pedí:**
+"Agregar nuevamente dos sensores auditivos análogos en A7 y A6, llamados OidoIzq y OidoDer"
+
+**Qué cambió en el proyecto:**
+Se reincorporaron las lecturas analógicas OidoIzq en A7 y OidoDer en A6, junto con sus valores visibles y alertas de saturación y diferencia izquierda/derecha. El micrófono del computador y sus controles se mantienen.
+
+### 04-09-2026 - Exercise-03
+
+**Herramienta / agente:**
+Copilot
+**Qué pedí:**
 "Acelerar la lectura para detectar parpadeo en la iluminación como sobrecarga sensorial"
 
 **Qué cambió en el proyecto:**

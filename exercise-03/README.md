@@ -9,7 +9,7 @@ Base de HTML, CSS y JavaScript estático para conectar una placa Arduino al nave
 3. Presiona **Conectar Arduino** y elige el puerto de la placa.
 4. Usa los controles para enviar comandos y observa los datos recibidos en el registro.
 
-La comunicación usa `9600` baudios y mensajes de texto terminados en `\\n`. `alcohol135` está conectado a `A0`, `CO9` a `A1`, `OjoIzq` a `A4` y `OjoDer` a `A3`. Los valores analógicos usan escala de 12 bits (`0–4095`). El sonido se lee desde el micrófono del computador en la página web.
+La comunicación usa `9600` baudios y mensajes de texto terminados en `\\n`. `alcohol135` está conectado a `A0`, `CO9` a `A1`, `OidoIzq` a `A7`, `OidoDer` a `A6`, `OjoIzq` a `A4` y `OjoDer` a `A3`. Los valores analógicos usan escala de 12 bits (`0–4095`). El micrófono del computador continúa disponible en la página web.
 
 Los sensores analógicos deben conectarse con `VCC` a 5V, `GND` a GND y `AO` al pin indicado.
 
@@ -23,9 +23,9 @@ Los sensores analógicos deben conectarse con `VCC` a 5V, `GND` a GND y `AO` al 
 
 El sketch debe leer cada línea y decidir qué hacer con ella. Para enviar datos hacia la página, Arduino debe usar `Serial.println(...)`.
 
-La lectura automática tiene este formato: `alcohol135:345,CO9:512,OjoIzq:2100,OjoDer:1900,ALERTAS:ninguna`. La página interpreta ese formato y actualiza los gráficos `Perfume`, `Monóxido de carbono` y `Calidad del aire`. Este último representa `alcohol135 + CO9`.
+La lectura automática tiene este formato: `alcohol135:345,CO9:512,OidoIzq:800,OidoDer:950,OjoIzq:2100,OjoDer:1900,ALERTAS:ninguna`. La página interpreta ese formato y actualiza los gráficos y las cuatro lecturas laterales.
 
-Arduino lee los LDR cada `20 ms` y transmite datos cada `150 ms`. Genera alertas cuando un sensor analógico supera `3600`, cuando hay una diferencia de al menos `1000` entre los sensores visuales izquierda/derecha o cuando detecta al menos 5 cambios alternados de al menos `120` unidades en la ventana de iluminación. La página genera una alerta cuando el micrófono supera `75 dB` aproximados o cuando el nivel de sonido cambia de forma rápida y repetitiva. La medición del navegador es orientativa y requiere calibración externa para representar dB SPL reales; las alertas no constituyen una medición médica.
+Arduino lee los LDR cada `20 ms` y transmite datos cada `150 ms`. Genera alertas cuando un sensor supera `3600`, cuando hay una diferencia de al menos `1000` entre sensores izquierdos y derechos o cuando detecta al menos 5 cambios alternados de al menos `120` unidades en la iluminación. La página genera una alerta cuando el micrófono supera `75 dB` aproximados o cuando el nivel de sonido cambia de forma rápida y repetitiva.
 
 Si la página responde "LED encendido" pero el LED no cambia, confirma que seleccionaste la placa y el puerto correctos en Arduino IDE. Algunas placas usan lógica invertida para el LED integrado; en ese caso intercambia `HIGH` y `LOW` en las dos llamadas de `digitalWrite`.
 

@@ -15,6 +15,8 @@ const alcohol135Value = document.querySelector("#alcohol135-value");
 const co9Value = document.querySelector("#co9-value");
 const airQualityValue = document.querySelector("#air-quality-value");
 const sensorValueElements = {
+  oidoIzq: document.querySelector("#oido-izq-value"),
+  oidoDer: document.querySelector("#oido-der-value"),
   ojoIzq: document.querySelector("#ojo-izq-value"),
   ojoDer: document.querySelector("#ojo-der-value"),
 };
@@ -111,12 +113,17 @@ function handleReceivedMessage(message) {
 }
 
 function updateSensorCharts(message) {
-  const values = message.match(/alcohol135:(\d+),CO9:(\d+),OjoIzq:(\d+),OjoDer:(\d+),ALERTAS:(.*)/i);
+  const values = message.match(/alcohol135:(\d+),CO9:(\d+),OidoIzq:(\d+),OidoDer:(\d+),OjoIzq:(\d+),OjoDer:(\d+),ALERTAS:(.*)/i);
   if (!values) return;
 
   const alcohol135 = Number(values[1]);
   const co9 = Number(values[2]);
-  const sensors = { ojoIzq: Number(values[3]), ojoDer: Number(values[4]) };
+  const sensors = {
+    oidoIzq: Number(values[3]),
+    oidoDer: Number(values[4]),
+    ojoIzq: Number(values[5]),
+    ojoDer: Number(values[6]),
+  };
   chartHistory.push({ time: new Date(), alcohol135, co9, sum: alcohol135 + co9 });
   if (chartHistory.length > MAX_POINTS) chartHistory.shift();
   alcohol135Value.textContent = alcohol135;
@@ -125,7 +132,7 @@ function updateSensorCharts(message) {
   Object.entries(sensors).forEach(([name, value]) => {
     sensorValueElements[name].textContent = value;
   });
-  serialAlerts = values[5] === "ninguna" ? [] : values[5].split(";").filter(Boolean);
+  serialAlerts = values[7] === "ninguna" ? [] : values[7].split(";").filter(Boolean);
   renderAlerts();
   charts.forEach(drawChart);
 }
@@ -142,9 +149,12 @@ function formatAlert(alert) {
   const labels = {
     alcohol135_saturado: "alcohol135 sobresaturado",
     CO9_saturado: "CO9 sobresaturado",
+    OidoIzq_saturado: "OidoIzq sobresaturado",
+    OidoDer_saturado: "OidoDer sobresaturado",
     OjoIzq_saturado: "OjoIzq sobresaturado",
     OjoDer_saturado: "OjoDer sobresaturado",
     diferencia_izquierda_derecha: "Diferencia izquierda/derecha alta",
+    diferencia_auditiva_izquierda_derecha: "Diferencia auditiva alta",
     parpadeo_iluminacion: "Parpadeo de iluminación detectado",
     microfono_nivel_alto: "Nivel alto de decibeles",
     microfono_parpadeante: "Ruido parpadeante detectado",

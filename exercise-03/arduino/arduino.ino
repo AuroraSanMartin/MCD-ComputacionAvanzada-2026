@@ -1,6 +1,8 @@
 const int LED_PIN = 2;
 const int SMOKE_A0_PIN = A0;
 const int SMOKE_A1_PIN = A1;
+const int OIDO_IZQ_PIN = A7;
+const int OIDO_DER_PIN = A6;
 const int OJO_IZQ_PIN = A4;
 const int OJO_DER_PIN = A3;
 
@@ -42,8 +44,10 @@ void loop() {
     lastSensorRead = millis();
     int alcohol135 = analogRead(SMOKE_A0_PIN);
     int CO9 = analogRead(SMOKE_A1_PIN);
+    int oidoIzq = analogRead(OIDO_IZQ_PIN);
+    int oidoDer = analogRead(OIDO_DER_PIN);
 
-    sendSensorData(alcohol135, CO9, ojoIzqActual, ojoDerActual);
+    sendSensorData(alcohol135, CO9, oidoIzq, oidoDer, ojoIzqActual, ojoDerActual);
   }
 
   if (Serial.available()) {
@@ -104,12 +108,16 @@ void printAlert(bool &hasAlert, const char *label) {
   hasAlert = true;
 }
 
-void sendSensorData(int alcohol135, int CO9, int ojoIzq, int ojoDer) {
+void sendSensorData(int alcohol135, int CO9, int oidoIzq, int oidoDer, int ojoIzq, int ojoDer) {
   bool hasAlert = false;
   Serial.print("alcohol135:");
   Serial.print(alcohol135);
   Serial.print(",CO9:");
   Serial.print(CO9);
+  Serial.print(",OidoIzq:");
+  Serial.print(oidoIzq);
+  Serial.print(",OidoDer:");
+  Serial.print(oidoDer);
   Serial.print(",OjoIzq:");
   Serial.print(ojoIzq);
   Serial.print(",OjoDer:");
@@ -118,10 +126,15 @@ void sendSensorData(int alcohol135, int CO9, int ojoIzq, int ojoDer) {
 
   if (alcohol135 >= SATURATION_THRESHOLD) printAlert(hasAlert, "alcohol135_saturado");
   if (CO9 >= SATURATION_THRESHOLD) printAlert(hasAlert, "CO9_saturado");
+  if (oidoIzq >= SATURATION_THRESHOLD) printAlert(hasAlert, "OidoIzq_saturado");
+  if (oidoDer >= SATURATION_THRESHOLD) printAlert(hasAlert, "OidoDer_saturado");
   if (ojoIzq >= SATURATION_THRESHOLD) printAlert(hasAlert, "OjoIzq_saturado");
   if (ojoDer >= SATURATION_THRESHOLD) printAlert(hasAlert, "OjoDer_saturado");
   if (abs(ojoIzq - ojoDer) >= DIFFERENCE_THRESHOLD) {
     printAlert(hasAlert, "diferencia_izquierda_derecha");
+  }
+  if (abs(oidoIzq - oidoDer) >= DIFFERENCE_THRESHOLD) {
+    printAlert(hasAlert, "diferencia_auditiva_izquierda_derecha");
   }
   if (isLightFlickering(ojoIzqHistory) || isLightFlickering(ojoDerHistory)) {
     printAlert(hasAlert, "parpadeo_iluminacion");
@@ -131,5 +144,12 @@ void sendSensorData(int alcohol135, int CO9, int ojoIzq, int ojoDer) {
 }
 
 void sendCurrentSensorData() {
-  sendSensorData(analogRead(SMOKE_A0_PIN), analogRead(SMOKE_A1_PIN), ojoIzqActual, ojoDerActual);
+  sendSensorData(
+    analogRead(SMOKE_A0_PIN),
+    analogRead(SMOKE_A1_PIN),
+    analogRead(OIDO_IZQ_PIN),
+    analogRead(OIDO_DER_PIN),
+    ojoIzqActual,
+    ojoDerActual
+  );
 }
