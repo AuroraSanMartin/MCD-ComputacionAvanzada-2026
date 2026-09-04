@@ -44,7 +44,7 @@ void loop() {
     lastSensorRead = millis();
     int alcohol135 = analogRead(SMOKE_A0_PIN);
     int CO9 = analogRead(SMOKE_A1_PIN);
-    int oidoIzq = analogRead(OIDO_IZQ_PIN);
+    int oidoIzq = analogRead(OIDO_IZQ_PIN)-30;
     int oidoDer = analogRead(OIDO_DER_PIN);
 
     sendSensorData(alcohol135, CO9, oidoIzq, oidoDer, ojoIzqActual, ojoDerActual);
