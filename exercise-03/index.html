@@ -19,24 +19,34 @@
       <div class="charts" aria-live="polite">
         <article class="chart-card">
           <div class="chart-heading"><h2>Perfume</h2><strong id="alcohol135-value">---</strong></div>
-          <p>Lectura de alcohol135 · A0</p>
+          <p>Lectura de alcohol135 · A0 · 0–4095</p>
           <canvas id="alcohol135-chart" aria-label="Gráfico de lectura de alcohol135"></canvas>
         </article>
         <article class="chart-card">
           <div class="chart-heading"><h2>Monóxido de carbono</h2><strong id="co9-value">---</strong></div>
-          <p>Lectura de CO9 · A1</p>
+          <p>Lectura de CO9 · A1 · 0–4095</p>
           <canvas id="co9-chart" aria-label="Gráfico de lectura de CO9"></canvas>
         </article>
         <article class="chart-card chart-card-wide">
           <div class="chart-heading"><h2>Calidad del aire</h2><strong id="air-quality-value">---</strong></div>
-          <p>Suma de alcohol135 + CO9</p>
+          <p>Suma de alcohol135 + CO9 · 0–8190</p>
           <canvas id="air-quality-chart" aria-label="Gráfico de calidad del aire"></canvas>
         </article>
       </div>
 
+      <section class="sensor-readings" aria-live="polite">
+        <article><span>OjoIzq · A4</span><strong id="ojo-izq-value">---</strong></article>
+        <article><span>OjoDer · A3</span><strong id="ojo-der-value">---</strong></article>
+      </section>
+
+      <section class="alert-panel" aria-live="assertive">
+        <div class="alert-heading"><h2>Alertas sensoriales</h2><span>En tiempo real</span></div>
+        <ul id="alert-list"><li class="alert-none">Sin alertas</li></ul>
+      </section>
+
       <div class="protocol-note">
         <span class="protocol-index">01</span>
-        <p>Arduino envía una muestra cada 500 ms. La página conserva los últimos 60 puntos y calcula la suma de ambas lecturas.</p>
+        <p>Arduino analiza la iluminación cada 20 ms y envía datos cada 150 ms. La página conserva los últimos 60 puntos y calcula la suma de ambas lecturas.</p>
       </div>
     </section>
 
@@ -53,6 +63,12 @@
         </div>
         <button id="connect-button" type="button">Conectar Arduino</button>
         <p id="browser-note" class="support-note"></p>
+      </section>
+
+      <section class="microphone-section">
+        <div class="mic-heading"><h3>Micrófono del computador</h3><strong id="decibel-value">---</strong></div>
+        <p id="microphone-status" class="support-note">Sin permiso de micrófono</p>
+        <button id="microphone-button" class="secondary" type="button">Activar micrófono</button>
       </section>
 
       <section class="control-group">

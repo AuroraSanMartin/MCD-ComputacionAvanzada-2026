@@ -23,13 +23,28 @@ const serialLog = document.querySelector("#serial-log");
 const alcohol135Value = document.querySelector("#alcohol135-value");
 const co9Value = document.querySelector("#co9-value");
 const airQualityValue = document.querySelector("#air-quality-value");
+const sensorValueElements = {
+  ojoIzq: document.querySelector("#ojo-izq-value"),
+  ojoDer: document.querySelector("#ojo-der-value"),
+};
+const alertList = document.querySelector("#alert-list");
+const microphoneButton = document.querySelector("#microphone-button");
+const microphoneStatus = document.querySelector("#microphone-status");
+const decibelValue = document.querySelector("#decibel-value");
+let audioContext = null;
+let microphoneStream = null;
+let analyser = null;
+let microphoneFrame = null;
+let microphoneHistory = [];
+let serialAlerts = [];
+let microphoneAlerts = [];
 const chartHistory = [];
 const MAX_POINTS = 60;
 
 const charts = [
-  { canvas: document.querySelector("#alcohol135-chart"), label: "alcohol135", color: "#e6a15c", max: 1023, key: "alcohol135" },
-  { canvas: document.querySelector("#co9-chart"), label: "CO9", color: "#8db99c", max: 1023, key: "co9" },
-  { canvas: document.querySelector("#air-quality-chart"), label: "Calidad del aire", color: "#d87866", max: 2046, key: "sum" },
+  { canvas: document.querySelector("#alcohol135-chart"), label: "alcohol135", color: "#e6a15c", max: 4095, key: "alcohol135" },
+  { canvas: document.querySelector("#co9-chart"), label: "CO9", color: "#8db99c", max: 4095, key: "co9" },
+  { canvas: document.querySelector("#air-quality-chart"), label: "Calidad del aire", color: "#d87866", max: 8190, key: "sum" },
 ];
 
 function setConnectionState(state, message) {
@@ -133,17 +148,120 @@ function handleReceivedMessage(message) {
 }
 
 function updateSensorCharts(message) {
-  const values = message.match(/alcohol135:(\d+),CO9:(\d+)/i);
+  const values = message.match(/alcohol135:(\d+),CO9:(\d+),OjoIzq:(\d+),OjoDer:(\d+),ALERTAS:(.*)/i);
   if (!values) return;
 
   const alcohol135 = Number(values[1]);
   const co9 = Number(values[2]);
+  const sensors = { ojoIzq: Number(values[3]), ojoDer: Number(values[4]) };
   chartHistory.push({ time: new Date(), alcohol135, co9, sum: alcohol135 + co9 });
   if (chartHistory.length > MAX_POINTS) chartHistory.shift();
   alcohol135Value.textContent = alcohol135;
   co9Value.textContent = co9;
   airQualityValue.textContent = alcohol135 + co9;
+  Object.entries(sensors).forEach(([name, value]) => {
+    sensorValueElements[name].textContent = value;
+  });
+  serialAlerts = values[5] === "ninguna" ? [] : values[5].split(";").filter(Boolean);
+  renderAlerts();
   charts.forEach(drawChart);
+}
+
+function renderAlerts() {
+  const activeAlerts = [...new Set([...serialAlerts, ...microphoneAlerts])];
+  alertList.innerHTML = activeAlerts.length === 0
+    ? "<li class=\"alert-none\">Sin alertas</li>"
+    : activeAlerts.map((alert) => `<li>${formatAlert(alert)}</li>`).join("");
+  alertList.classList.toggle("has-alert", activeAlerts.length > 0);
+}
+
+function formatAlert(alert) {
+  const labels = {
+    alcohol135_saturado: "alcohol135 sobresaturado",
+    CO9_saturado: "CO9 sobresaturado",
+    OjoIzq_saturado: "OjoIzq sobresaturado",
+    OjoDer_saturado: "OjoDer sobresaturado",
+    diferencia_izquierda_derecha: "Diferencia izquierda/derecha alta",
+    parpadeo_iluminacion: "Parpadeo de iluminación detectado",
+    microfono_nivel_alto: "Nivel alto de decibeles",
+    microfono_parpadeante: "Ruido parpadeante detectado",
+  };
+  return labels[alert] ?? alert;
+}
+
+async function toggleMicrophone() {
+  if (microphoneStream) {
+    microphoneStream.getTracks().forEach((track) => track.stop());
+    audioContext?.close();
+    microphoneStream = null;
+    cancelAnimationFrame(microphoneFrame);
+    microphoneButton.textContent = "Activar micrófono";
+    microphoneStatus.textContent = "Micrófono detenido";
+    decibelValue.textContent = "---";
+    microphoneHistory = [];
+    microphoneAlerts = [];
+    renderAlerts();
+    return;
+  }
+
+  if (!navigator.mediaDevices?.getUserMedia) {
+    microphoneStatus.textContent = "Este navegador no permite usar el micrófono.";
+    return;
+  }
+
+  try {
+    microphoneStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    microphoneHistory = [];
+    audioContext = new AudioContext();
+    const source = audioContext.createMediaStreamSource(microphoneStream);
+    analyser = audioContext.createAnalyser();
+    analyser.fftSize = 1024;
+    source.connect(analyser);
+    microphoneButton.textContent = "Detener micrófono";
+    microphoneStatus.textContent = "Escuchando · dB aproximados";
+    readMicrophone();
+  } catch (error) {
+    microphoneStatus.textContent = error.name === "NotAllowedError"
+      ? "Permiso de micrófono rechazado."
+      : `No fue posible activar el micrófono: ${error.message}`;
+  }
+}
+
+function readMicrophone() {
+  if (!analyser || !microphoneStream) return;
+  const samples = new Uint8Array(analyser.fftSize);
+  analyser.getByteTimeDomainData(samples);
+  let sum = 0;
+  samples.forEach((sample) => {
+    const normalized = (sample - 128) / 128;
+    sum += normalized * normalized;
+  });
+  const rms = Math.sqrt(sum / samples.length);
+  const decibels = Math.max(0, Math.round(20 * Math.log10(Math.max(rms, 0.00001)) + 90));
+  decibelValue.textContent = `${decibels} dB`;
+  microphoneHistory.push(decibels);
+  if (microphoneHistory.length > 12) microphoneHistory.shift();
+  const isHigh = decibels >= 75;
+  const isFlickering = isMicrophoneFlickering();
+  microphoneAlerts = [
+    ...(isHigh ? ["microfono_nivel_alto"] : []),
+    ...(isFlickering ? ["microfono_parpadeante"] : []),
+  ];
+  renderAlerts();
+  microphoneFrame = requestAnimationFrame(readMicrophone);
+}
+
+function isMicrophoneFlickering() {
+  if (microphoneHistory.length < 8) return false;
+  let directionChanges = 0;
+  for (let index = 2; index < microphoneHistory.length; index++) {
+    const previousChange = microphoneHistory[index - 1] - microphoneHistory[index - 2];
+    const change = microphoneHistory[index] - microphoneHistory[index - 1];
+    if (Math.abs(previousChange) >= 3 && Math.abs(change) >= 3 && Math.sign(previousChange) !== Math.sign(change)) {
+      directionChanges++;
+    }
+  }
+  return directionChanges >= 4;
 }
 
 function drawChart(chart) {
@@ -228,6 +346,7 @@ commandForm.addEventListener("submit", (event) => {
 clearLogButton.addEventListener("click", () => {
   serialLog.innerHTML = '<p class="log-empty">Los eventos aparecerán aquí.</p>';
 });
+microphoneButton.addEventListener("click", toggleMicrophone);
 
 if (!("serial" in navigator)) {
   browserNote.textContent = "Web Serial no está disponible en este navegador.";

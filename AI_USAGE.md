@@ -4,6 +4,46 @@ Documenta de manera breve cuándo y para qué utilizaste asistentes de IA. El ob
 
 ## Registro
 
+### 04-09-2026 - Exercise-03
+
+**Herramienta / agente:**
+Copilot
+**Qué pedí:**
+"Acelerar la lectura para detectar parpadeo en la iluminación como sobrecarga sensorial"
+
+**Qué cambió en el proyecto:**
+Los LDR ahora se muestrean cada 20 ms y se analizan en una ventana de cambios alternados. Se agregó la alerta `parpadeo_iluminacion` y la transmisión serial se limita a cada 150 ms para evitar saturar el puerto.
+
+### 04-09-2026 - Exercise-03
+
+**Herramienta / agente:**
+Copilot
+**Qué pedí:**
+"Quitar los sensores BigSound y usar el micrófono del computador para detectar decibeles y sobrecarga sensorial"
+
+**Qué cambió en el proyecto:**
+Se eliminaron los BigSound del sketch y del protocolo. La página ahora usa el micrófono del computador para estimar decibeles y detectar niveles altos o ruido parpadeante.
+
+### 04-09-2026 - Exercise-03
+
+**Herramienta / agente:**
+Copilot
+**Qué pedí:**
+"Corregir la escala de sobrecarga a 4095 y reconocer diferencias en sensores BigSound digitales"
+
+**Qué cambió en el proyecto:**
+Se cambió la escala analógica a 12 bits, se elevó el umbral de saturación visual a 3600 y los BigSound ahora se leen mediante sus salidas digitales DO, con detección de estados distintos y cambios repetitivos.
+
+### 04-09-2026 - Exercise-03
+
+**Herramienta / agente:**
+Copilot
+**Qué pedí:**
+"Agregar sensores Big Sound y LDR, leerlos en Arduino, mostrar sus valores y avisar sobre saturación, diferencias izquierda/derecha y parpadeos constantes"
+
+**Qué cambió en el proyecto:**
+Se agregaron las lecturas de OidoIzq (A6), OidoDer (A5), OjoIzq (A4) y OjoDer (A3), junto con detección de saturación, diferencias entre lados y oscilaciones repetitivas. La interfaz ahora muestra los valores y las alertas en tiempo real.
+
 ### 02-09-2026 - Exercise-03
 
 **Herramienta / agente:**
