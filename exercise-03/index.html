@@ -71,40 +71,6 @@
         <button id="microphone-button" class="secondary" type="button">Activar micrófono</button>
       </section>
 
-      <section class="control-group">
-        <h3>Salida de prueba</h3>
-        <div class="control-row">
-          <label for="output-value">Valor</label>
-          <output id="output-value-label" for="output-value">50</output>
-        </div>
-        <input id="output-value" type="range" min="0" max="100" value="50" />
-        <button id="send-value-button" class="secondary" type="button" disabled>Enviar valor</button>
-        <div class="button-grid">
-          <button id="on-button" class="secondary" type="button" disabled>Encender</button>
-          <button id="off-button" class="secondary" type="button" disabled>Apagar</button>
-        </div>
-      </section>
-
-      <section class="command-section">
-        <h3>Comando manual</h3>
-        <form id="command-form">
-          <label class="visually-hidden" for="command-input">Comando serial</label>
-          <div class="command-entry">
-            <input id="command-input" type="text" placeholder="Ej: SENSOR?" autocomplete="off" />
-            <button type="submit" disabled>Enviar</button>
-          </div>
-        </form>
-      </section>
-
-      <section class="log-section">
-        <div class="log-header">
-          <h3>Registro</h3>
-          <button id="clear-log-button" class="text-button" type="button">Limpiar</button>
-        </div>
-        <div id="serial-log" class="serial-log" role="log" aria-live="polite" aria-label="Registro serial">
-          <p class="log-empty">Los eventos aparecerán aquí.</p>
-        </div>
-      </section>
     </aside>
   </main>
 

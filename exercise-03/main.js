@@ -7,19 +7,10 @@ let keepReading = false;
 let receivedBuffer = "";
 
 const connectButton = document.querySelector("#connect-button");
-const sendValueButton = document.querySelector("#send-value-button");
-const onButton = document.querySelector("#on-button");
-const offButton = document.querySelector("#off-button");
-const commandForm = document.querySelector("#command-form");
-const commandInput = document.querySelector("#command-input");
-const clearLogButton = document.querySelector("#clear-log-button");
-const outputValue = document.querySelector("#output-value");
-const outputValueLabel = document.querySelector("#output-value-label");
 const connectionStatus = document.querySelector("#connection-status");
 const statusDot = document.querySelector("#status-dot");
 const portLabel = document.querySelector("#port-label");
 const browserNote = document.querySelector("#browser-note");
-const serialLog = document.querySelector("#serial-log");
 const alcohol135Value = document.querySelector("#alcohol135-value");
 const co9Value = document.querySelector("#co9-value");
 const airQualityValue = document.querySelector("#air-quality-value");
@@ -50,36 +41,13 @@ const charts = [
 function setConnectionState(state, message) {
   connectionStatus.textContent = message;
   statusDot.className = `status-dot ${state}`;
-  const connected = state === "connected";
-  [sendValueButton, onButton, offButton, commandForm.querySelector("button")].forEach((button) => {
-    button.disabled = !connected;
-  });
-  connectButton.textContent = connected ? "Desconectar" : "Conectar Arduino";
-}
-
-function addLog(message, type = "system") {
-  const emptyMessage = serialLog.querySelector(".log-empty");
-  if (emptyMessage) emptyMessage.remove();
-
-  const entry = document.createElement("p");
-  const time = new Date().toLocaleTimeString("es-CL");
-  entry.className = `log-entry ${type}`;
-  entry.innerHTML = `<time>[${time}]</time> ${escapeHtml(message)}`;
-  serialLog.append(entry);
-  serialLog.scrollTop = serialLog.scrollHeight;
-}
-
-function escapeHtml(value) {
-  const element = document.createElement("div");
-  element.textContent = value;
-  return element.innerHTML;
+  connectButton.textContent = state === "connected" ? "Desconectar Arduino" : "Conectar Arduino";
 }
 
 async function connectToArduino() {
   if (!("serial" in navigator)) {
     setConnectionState("error", "No compatible");
     browserNote.textContent = "Web Serial requiere Chrome o Edge en una conexión segura (HTTPS o localhost).";
-    addLog("Este navegador no dispone de Web Serial.", "system");
     return;
   }
 
@@ -90,7 +58,6 @@ async function connectToArduino() {
     portLabel.textContent = info.usbVendorId ? `USB ${info.usbVendorId}` : "Puerto serial";
     setConnectionState("connected", "Conectado");
     browserNote.textContent = `Velocidad: ${BAUD_RATE} baudios`;
-    addLog("Conexión abierta.");
     startReading();
   } catch (error) {
     if (error.name !== "NotFoundError") {
@@ -100,7 +67,6 @@ async function connectToArduino() {
         ? "El puerto está ocupado. Cierra el Monitor Serial de Arduino IDE y vuelve a intentar."
         : `No fue posible conectar: ${error.message}`;
       browserNote.textContent = message;
-      addLog(message, "system");
     }
   }
 }
@@ -117,7 +83,6 @@ async function disconnectFromArduino() {
   port = null;
   portLabel.textContent = "Sin puerto";
   setConnectionState("", "Desconectado");
-  addLog("Conexión cerrada.");
 }
 
 async function startReading() {
@@ -135,7 +100,6 @@ async function startReading() {
       messages.map((message) => message.trim()).filter(Boolean).forEach(handleReceivedMessage);
     }
   } catch (error) {
-    addLog(`Lectura interrumpida: ${error.message}`, "system");
   } finally {
     reader.releaseLock();
     reader = null;
@@ -144,7 +108,6 @@ async function startReading() {
 
 function handleReceivedMessage(message) {
   updateSensorCharts(message);
-  addLog(message, "received");
 }
 
 function updateSensorCharts(message) {
@@ -320,7 +283,6 @@ async function sendMessage(message) {
   await writer.write(new TextEncoder().encode(`${message}\n`));
   writer.releaseLock();
   writer = null;
-  addLog(message, "sent");
 }
 
 connectButton.addEventListener("click", () => {
@@ -328,24 +290,6 @@ connectButton.addEventListener("click", () => {
   else connectToArduino();
 });
 
-outputValue.addEventListener("input", () => {
-  outputValueLabel.textContent = outputValue.value;
-});
-sendValueButton.addEventListener("click", () => sendMessage(`VALOR:${outputValue.value}`));
-onButton.addEventListener("click", () => sendMessage("LED:ON"));
-offButton.addEventListener("click", () => sendMessage("LED:OFF"));
-
-commandForm.addEventListener("submit", (event) => {
-  event.preventDefault();
-  const command = commandInput.value.trim();
-  if (!command) return;
-  sendMessage(command);
-  commandInput.value = "";
-});
-
-clearLogButton.addEventListener("click", () => {
-  serialLog.innerHTML = '<p class="log-empty">Los eventos aparecerán aquí.</p>';
-});
 microphoneButton.addEventListener("click", toggleMicrophone);
 
 if (!("serial" in navigator)) {
