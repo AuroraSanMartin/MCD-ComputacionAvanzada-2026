@@ -30,6 +30,9 @@ let microphoneFrame = null;
 let microphoneHistory = [];
 let serialAlerts = [];
 let microphoneAlerts = [];
+let stableLeftEye = null;
+let stableRightEye = null;
+const EYE_CHANGE_DEAD_ZONE = 30;
 
 function setConnectionState(state, message) {
   connectionStatus.textContent = message;
@@ -114,15 +117,53 @@ function updateSensorReadings(message) {
     ojoIzq: Number(values[5]),
     ojoDer: Number(values[6]),
   };
-  window.dispatchEvent(new CustomEvent("exercise03:sensors", { detail: sensors }));
   alcohol135Value.textContent = alcohol135;
   co9Value.textContent = co9;
-  airQualityValue.textContent = alcohol135 + co9;
+  const airQuality = alcohol135 + co9;
+  airQualityValue.textContent = airQuality;
   Object.entries(sensors).forEach(([name, value]) => {
     sensorValueElements[name].textContent = value;
   });
+  const previousStableLeftEye = stableLeftEye;
+  const previousStableRightEye = stableRightEye;
+  stableLeftEye = updateStableEye(stableLeftEye, sensors.ojoIzq);
+  stableRightEye = updateStableEye(stableRightEye, sensors.ojoDer);
+  const leftEyeChanged = previousStableLeftEye !== stableLeftEye;
+  const rightEyeChanged = previousStableRightEye !== stableRightEye;
   serialAlerts = values[7] === "ninguna" ? [] : values[7].split(";").filter(Boolean);
+  const visualOverloadIntensity = calculateVisualOverloadIntensity(stableLeftEye, stableRightEye);
+  window.dispatchEvent(new CustomEvent("exercise03:sensors", {
+    detail: {
+      ...sensors,
+      airQuality,
+      ojoIzq: stableLeftEye,
+      ojoDer: stableRightEye,
+      visualOverload: visualOverloadIntensity > 0,
+      visualOverloadIntensity,
+      leftEyeChanged,
+      rightEyeChanged,
+    },
+  }));
   renderAlerts();
+}
+
+function updateStableEye(previousValue, nextValue) {
+  if (previousValue === null || Math.abs(nextValue - previousValue) > EYE_CHANGE_DEAD_ZONE) {
+    return nextValue;
+  }
+  return previousValue;
+}
+
+function calculateVisualOverloadIntensity(leftEye, rightEye) {
+  const lowestReading = Math.min(leftEye, rightEye);
+  const eyeDarkness = lowestReading < 1000
+    ? Math.max(0.25, (1000 - lowestReading) / 1000)
+    : 0;
+  const difference = Math.abs(leftEye - rightEye);
+  const imbalance = difference >= 500
+    ? Math.max(0.25, Math.min(1, (difference - 500) / 1500 + 0.25))
+    : 0;
+  return Math.max(eyeDarkness, imbalance);
 }
 
 function renderAlerts() {
@@ -142,6 +183,7 @@ function formatAlert(alert) {
     OjoIzq_saturado: "OjoIzq sobresaturado",
     OjoDer_saturado: "OjoDer sobresaturado",
     diferencia_izquierda_derecha: "Diferencia izquierda/derecha alta",
+    sobrecarga_visual: "Sobrecarga visual",
     diferencia_auditiva_izquierda_derecha: "Diferencia auditiva alta",
     parpadeo_iluminacion: "Parpadeo de iluminación detectado",
     microfono_nivel_alto: "Nivel alto de decibeles",

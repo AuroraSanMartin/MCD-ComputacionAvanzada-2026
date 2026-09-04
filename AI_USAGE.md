@@ -9,6 +9,126 @@ Documenta de manera breve cuándo y para qué utilizaste asistentes de IA. El ob
 **Herramienta / agente:**
 Copilot
 **Qué pedí:**
+"Desenfocar la vista del manto según el valor de calidad del aire"
+
+**Qué cambió en el proyecto:**
+La suma de alcohol135 y CO9 ahora controla un desenfoque gradual del manto, desde 0 hasta 10 píxeles. El desenfoque no afecta las lecturas, alertas ni controles del panel derecho.
+
+### 04-09-2026 - Exercise-03
+
+**Herramienta / agente:**
+Copilot
+**Qué pedí:**
+"Corregir el parpadeo que continuaba aunque los valores no cambiaran más de 30"
+
+**Qué cambió en el proyecto:**
+Se eliminó el temporizador autónomo del parpadeo suave. Ahora cada gradiente solo recibe un nuevo objetivo cuando su lectura estable cambia más de 30 unidades; las lecturas menores conservan la intensidad actual.
+
+### 04-09-2026 - Exercise-03
+
+**Herramienta / agente:**
+Copilot
+**Qué pedí:**
+"Reducir la sensibilidad: cambios de 30 o menos no deben modificar la intensidad de los gradientes"
+
+**Qué cambió en el proyecto:**
+Se agregó una zona muerta de 30 unidades por ojo. La interfaz sigue mostrando el valor instantáneo, pero el manto y la intensidad de sobrecarga usan una lectura estable hasta que el cambio supera 30.
+
+### 04-09-2026 - Exercise-03
+
+**Herramienta / agente:**
+Copilot
+**Qué pedí:**
+"Hacer gradual el cambio de intensidad del parpadeo cuando no hay sobresaturación"
+
+**Qué cambió en el proyecto:**
+Los niveles de parpadeo siguen siendo 100%, 75%, 25% y 0%, pero ahora funcionan como objetivos interpolados por frame. El brillo de cada gradiente se desplaza gradualmente hacia el siguiente nivel.
+
+### 04-09-2026 - Exercise-03
+
+**Herramienta / agente:**
+Copilot
+**Qué pedí:**
+"Corregir el parpadeo que continuaba con lecturas cercanas a 1300 en ambos ojos"
+
+**Qué cambió en el proyecto:**
+Se eliminó la alerta histórica de fluctuación como disparador del manto. Ahora el parpadeo visual depende exclusivamente de lectura menor a 1000 o diferencia izquierda/derecha de al menos 500.
+
+### 04-09-2026 - Exercise-03
+
+**Herramienta / agente:**
+Copilot
+**Qué pedí:**
+"Activar el parpadeo cuando la lectura de luz sea menor a 1000 o la diferencia entre ojos sea de al menos 500, con distintas intensidades"
+
+**Qué cambió en el proyecto:**
+Se agregaron los umbrales `1000` y `500` en Arduino y navegador. La severidad visual ahora escala de `0.25` a `1`, modificando la velocidad y la intensidad del parpadeo.
+
+### 04-09-2026 - Exercise-03
+
+**Herramienta / agente:**
+Copilot
+**Qué pedí:**
+"Hacer el parpadeo más rápido y brillante, variando entre 100%, 75%, 25% y 0%"
+
+**Qué cambió en el proyecto:**
+El parpadeo de baja luz ahora cambia cada 35–95 ms entre cuatro niveles discretos de brillo. Se aumentó la opacidad máxima de los gradientes y se redujo la transición visual para que la variación sea más rápida y evidente.
+
+### 04-09-2026 - Exercise-03
+
+**Herramienta / agente:**
+Copilot
+**Qué pedí:**
+"Hacer que el gradiente sea más brillante y parpadee levemente cuando el valor de cada ojo sea muy bajo"
+
+**Qué cambió en el proyecto:**
+Los gradientes ahora alcanzan mayor brillo con lecturas LDR bajas y tienen una oscilación suave independiente para cada ojo. El parpadeo fuerte de sobrecarga visual se conserva por separado.
+
+### 04-09-2026 - Exercise-03
+
+**Herramienta / agente:**
+Copilot
+**Qué pedí:**
+"Hacer que ambos gradientes cubran toda la pantalla y no solo el manto"
+
+**Qué cambió en el proyecto:**
+Se agregaron dos capas de gradiente que cubren todo el panel visual izquierdo, una desde cada borde hacia el centro. Su opacidad sigue las lecturas invertidas de OjoIzq y OjoDer y conserva el parpadeo por sobrecarga visual.
+
+### 04-09-2026 - Exercise-03
+
+**Herramienta / agente:**
+Copilot
+**Qué pedí:**
+"Hacer que ambos gradientes vayan desde los bordes hacia el centro y sean transparentes en el centro"
+
+**Qué cambió en el proyecto:**
+El perfil espacial de los gradientes ahora usa la distancia al centro: cada lado comienza visible en su borde y se desvanece hasta fuerza cero en la línea central.
+
+### 04-09-2026 - Exercise-03
+
+**Herramienta / agente:**
+Copilot
+**Qué pedí:**
+"Invertir la interpretación de los LDR porque un valor alto significa menos luz"
+
+**Qué cambió en el proyecto:**
+Los gradientes de OjoIzq y OjoDer ahora usan la lectura invertida: valores bajos representan más luz y valores altos atenúan el gradiente.
+
+### 04-09-2026 - Exercise-03
+
+**Herramienta / agente:**
+Copilot
+**Qué pedí:**
+"Agregar dos gradientes laterales controlados por cada ojo y hacerlos parpadear ante sobrecarga visual"
+
+**Qué cambió en el proyecto:**
+El manto Three.js ahora mezcla un gradiente desde cada borde hacia el centro según OjoIzq y OjoDer. Cuando Arduino informa sobrecarga visual, ambos gradientes cambian su visibilidad de forma irregular para producir un parpadeo impredecible.
+
+### 04-09-2026 - Exercise-03
+
+**Herramienta / agente:**
+Copilot
+**Qué pedí:**
 "Mover las lecturas de sensores al lado derecho y agruparlas de a dos"
 
 **Qué cambió en el proyecto:**

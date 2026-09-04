@@ -8,6 +8,8 @@ const int OJO_DER_PIN = A3;
 
 const int SATURATION_THRESHOLD = 3600;
 const int DIFFERENCE_THRESHOLD = 1000;
+const int LIGHT_OVERLOAD_THRESHOLD = 1000;
+const int VISUAL_DIFFERENCE_THRESHOLD = 500;
 const int LIGHT_FLICKER_DELTA = 120;
 const int LIGHT_FLICKER_CHANGES_REQUIRED = 5;
 const int LIGHT_HISTORY_SIZE = 12;
@@ -133,11 +135,12 @@ void sendSensorData(int alcohol135, int CO9, int oidoIzq, int oidoDer, int ojoIz
   if (abs(ojoIzq - ojoDer) >= DIFFERENCE_THRESHOLD) {
     printAlert(hasAlert, "diferencia_izquierda_derecha");
   }
+  if (ojoIzq < LIGHT_OVERLOAD_THRESHOLD || ojoDer < LIGHT_OVERLOAD_THRESHOLD ||
+      abs(ojoIzq - ojoDer) >= VISUAL_DIFFERENCE_THRESHOLD) {
+    printAlert(hasAlert, "sobrecarga_visual");
+  }
   if (abs(oidoIzq - oidoDer) >= DIFFERENCE_THRESHOLD) {
     printAlert(hasAlert, "diferencia_auditiva_izquierda_derecha");
-  }
-  if (isLightFlickering(ojoIzqHistory) || isLightFlickering(ojoDerHistory)) {
-    printAlert(hasAlert, "parpadeo_iluminacion");
   }
   if (!hasAlert) Serial.print("ninguna");
   Serial.println();
