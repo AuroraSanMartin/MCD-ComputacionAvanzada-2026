@@ -19,17 +19,18 @@ const sensorValueElements = {
   ojoIzq: document.querySelector("#ojo-izq-value"),
   ojoDer: document.querySelector("#ojo-der-value"),
 };
-const alertList = document.querySelector("#alert-list");
+const sensorCards = Object.fromEntries(
+  [...document.querySelectorAll("[data-sensor]")].map((card) => [card.dataset.sensor, card])
+);
 const microphoneButton = document.querySelector("#microphone-button");
 const microphoneStatus = document.querySelector("#microphone-status");
 const decibelValue = document.querySelector("#decibel-value");
+const microphoneSection = document.querySelector("#microphone-section");
 let audioContext = null;
 let microphoneStream = null;
 let analyser = null;
 let microphoneFrame = null;
 let microphoneHistory = [];
-let serialAlerts = [];
-let microphoneAlerts = [];
 let stableLeftEye = null;
 let stableRightEye = null;
 const EYE_CHANGE_DEAD_ZONE = 30;
@@ -121,6 +122,8 @@ function updateSensorReadings(message) {
   co9Value.textContent = co9;
   const airQuality = alcohol135 + co9;
   airQualityValue.textContent = airQuality;
+  setSensorState("alcohol135", getAnalogState(alcohol135));
+  setSensorState("co9", getAnalogState(co9));
   Object.entries(sensors).forEach(([name, value]) => {
     sensorValueElements[name].textContent = value;
   });
@@ -130,8 +133,15 @@ function updateSensorReadings(message) {
   stableRightEye = updateStableEye(stableRightEye, sensors.ojoDer);
   const leftEyeChanged = previousStableLeftEye !== stableLeftEye;
   const rightEyeChanged = previousStableRightEye !== stableRightEye;
-  serialAlerts = values[7] === "ninguna" ? [] : values[7].split(";").filter(Boolean);
   const visualOverloadIntensity = calculateVisualOverloadIntensity(stableLeftEye, stableRightEye);
+  const eyeDifference = Math.abs(stableLeftEye - stableRightEye);
+  setSensorState("ojoIzq", getEyeState(stableLeftEye, eyeDifference, visualOverloadIntensity));
+  setSensorState("ojoDer", getEyeState(stableRightEye, eyeDifference, visualOverloadIntensity));
+  const audioDifference = Math.abs(sensors.oidoIzq - sensors.oidoDer);
+  const audioState = sensors.oidoIzq >= 3600 || sensors.oidoDer >= 3600 || audioDifference >= 500 ? "danger" : audioDifference >= 250 ? "warning" : "normal";
+  setSensorState("oidoIzq", audioState);
+  setSensorState("oidoDer", audioState);
+  setSensorState("airQuality", getAirQualityState(airQuality));
   window.dispatchEvent(new CustomEvent("exercise03:sensors", {
     detail: {
       ...sensors,
@@ -144,7 +154,27 @@ function updateSensorReadings(message) {
       rightEyeChanged,
     },
   }));
-  renderAlerts();
+}
+
+function setSensorState(name, state) {
+  const card = sensorCards[name];
+  if (!card) return;
+  card.classList.remove("state-normal", "state-warning", "state-danger");
+  card.classList.add(`state-${state}`);
+}
+
+function getAnalogState(value) {
+  return value >= 3600 ? "danger" : value >= 2800 ? "warning" : "normal";
+}
+
+function getEyeState(value, difference, intensity) {
+  if (value < 1000 && intensity >= 0.75) return "danger";
+  if (value < 1000 || difference >= 500) return "warning";
+  return "normal";
+}
+
+function getAirQualityState(value) {
+  return value >= 6000 ? "danger" : value > 800 ? "warning" : "normal";
 }
 
 function updateStableEye(previousValue, nextValue) {
@@ -166,32 +196,6 @@ function calculateVisualOverloadIntensity(leftEye, rightEye) {
   return Math.max(eyeDarkness, imbalance);
 }
 
-function renderAlerts() {
-  const activeAlerts = [...new Set([...serialAlerts, ...microphoneAlerts])];
-  alertList.innerHTML = activeAlerts.length === 0
-    ? "<li class=\"alert-none\">Sin alertas</li>"
-    : activeAlerts.map((alert) => `<li>${formatAlert(alert)}</li>`).join("");
-  alertList.classList.toggle("has-alert", activeAlerts.length > 0);
-}
-
-function formatAlert(alert) {
-  const labels = {
-    alcohol135_saturado: "alcohol135 sobresaturado",
-    CO9_saturado: "CO9 sobresaturado",
-    OidoIzq_saturado: "OidoIzq sobresaturado",
-    OidoDer_saturado: "OidoDer sobresaturado",
-    OjoIzq_saturado: "OjoIzq sobresaturado",
-    OjoDer_saturado: "OjoDer sobresaturado",
-    diferencia_izquierda_derecha: "Diferencia izquierda/derecha alta",
-    sobrecarga_visual: "Sobrecarga visual",
-    diferencia_auditiva_izquierda_derecha: "Diferencia auditiva alta",
-    parpadeo_iluminacion: "Parpadeo de iluminación detectado",
-    microfono_nivel_alto: "Nivel alto de decibeles",
-    microfono_parpadeante: "Ruido parpadeante detectado",
-  };
-  return labels[alert] ?? alert;
-}
-
 async function toggleMicrophone() {
   if (microphoneStream) {
     microphoneStream.getTracks().forEach((track) => track.stop());
@@ -202,8 +206,7 @@ async function toggleMicrophone() {
     microphoneStatus.textContent = "Micrófono detenido";
     decibelValue.textContent = "---";
     microphoneHistory = [];
-    microphoneAlerts = [];
-    renderAlerts();
+    setMicrophoneState("normal");
     return;
   }
 
@@ -246,12 +249,13 @@ function readMicrophone() {
   if (microphoneHistory.length > 12) microphoneHistory.shift();
   const isHigh = decibels >= 75;
   const isFlickering = isMicrophoneFlickering();
-  microphoneAlerts = [
-    ...(isHigh ? ["microfono_nivel_alto"] : []),
-    ...(isFlickering ? ["microfono_parpadeante"] : []),
-  ];
-  renderAlerts();
+  setMicrophoneState(isHigh || isFlickering ? "danger" : decibels >= 60 ? "warning" : "normal");
   microphoneFrame = requestAnimationFrame(readMicrophone);
+}
+
+function setMicrophoneState(state) {
+  microphoneSection.classList.remove("state-normal", "state-warning", "state-danger");
+  microphoneSection.classList.add(`state-${state}`);
 }
 
 function isMicrophoneFlickering() {

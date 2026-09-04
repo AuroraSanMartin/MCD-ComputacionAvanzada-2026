@@ -9,6 +9,36 @@ Documenta de manera breve cuándo y para qué utilizaste asistentes de IA. El ob
 **Herramienta / agente:**
 Copilot
 **Qué pedí:**
+"Quitar el panel de alertas y mostrar la sobrecarga de cada sensor con rectángulos tipo semáforo"
+
+**Qué cambió en el proyecto:**
+Se eliminó el panel de alertas y cada lectura del panel derecho ahora usa borde verde, amarillo o rojo según su estado. El micrófono y la calidad del aire también muestran su estado mediante el mismo sistema.
+
+### 04-09-2026 - Exercise-03
+
+**Herramienta / agente:**
+Copilot
+**Qué pedí:**
+"Agregar un gradiente circular blanco que aparezca desde el centro junto al desenfoque"
+
+**Qué cambió en el proyecto:**
+Se añadió una capa radial blanca centrada en el panel visual. Su tamaño y opacidad aumentan con la calidad del aire, acompañando el desenfoque del manto.
+
+### 04-09-2026 - Exercise-03
+
+**Herramienta / agente:**
+Copilot
+**Qué pedí:**
+"Iniciar el desenfoque del manto cuando la calidad del aire supere 800"
+
+**Qué cambió en el proyecto:**
+El umbral de desenfoque se ajustó a `800`; desde ese valor hasta `8190`, el desenfoque aumenta gradualmente hasta 10 píxeles.
+
+### 04-09-2026 - Exercise-03
+
+**Herramienta / agente:**
+Copilot
+**Qué pedí:**
 "Desenfocar la vista del manto según el valor de calidad del aire"
 
 **Qué cambió en el proyecto:**

@@ -58,6 +58,20 @@ button:disabled { cursor: not-allowed; opacity: .42; }
   background: linear-gradient(270deg, rgba(141,185,156,.62), transparent 58%);
   opacity: var(--right-gradient-opacity, 0);
 }
+.air-quality-glow {
+  position: absolute;
+  z-index: 0;
+  top: 50%;
+  left: 50%;
+  width: var(--air-quality-glow-size, 0px);
+  height: var(--air-quality-glow-size, 0px);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,.72) 0%, rgba(255,255,255,.28) 38%, transparent 72%);
+  opacity: var(--air-quality-glow-opacity, 0);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  transition: width 220ms ease-out, height 220ms ease-out, opacity 220ms ease-out;
+}
 .mantle-visual {
   position: absolute;
   z-index: 0;
@@ -72,7 +86,7 @@ button:disabled { cursor: not-allowed; opacity: .42; }
   transition: filter 180ms ease-out;
 }
 .mantle-visual canvas { display: block; width: 100%; height: 100%; }
-.project-header, .sensor-readings, .alert-panel, .protocol-note { position: relative; z-index: 1; }
+.project-header, .sensor-readings, .protocol-note { position: relative; z-index: 1; }
 .eyebrow {
   margin: 0 0 15px;
   color: var(--faint);
@@ -82,10 +96,10 @@ button:disabled { cursor: not-allowed; opacity: .42; }
 }
 h1, h2, h3, p { margin-top: 0; }
 h1 {
-  max-width: 600px;
+  max-width: 500px;
   margin-bottom: 16px;
-  font-size: clamp(52px, 9vw, 132px);
-  font-weight: 300;
+  font-size: clamp(20px, 9vw, 52px);
+  font-weight: 100;
   letter-spacing: 0;
   line-height: .92;
 }
@@ -95,7 +109,7 @@ h1 {
   font-size: 16px;
   line-height: 1.55;
 }
-.microphone-section { border-bottom: 1px solid var(--line); padding: 20px 0; }
+.microphone-section { border: 1px solid var(--line); padding: 20px; transition: border-color 160ms ease, background 160ms ease; }
 .mic-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .mic-heading h3 { margin-bottom: 0; }
 .mic-heading strong { color: var(--accent); font-size: 24px; font-weight: 400; font-variant-numeric: tabular-nums; }
@@ -107,23 +121,12 @@ h1 {
 }
 .reading-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .sensor-readings article { border-left: 2px solid var(--line); padding-left: 8px; }
+.sensor-card { border: 1px solid var(--line) !important; border-left-width: 4px !important; padding: 10px; transition: border-color 160ms ease, background 160ms ease; }
+.sensor-card.state-normal, .microphone-section.state-normal { border-color: var(--connected); }
+.sensor-card.state-warning, .microphone-section.state-warning { border-color: #e6c15c; background: rgba(230,193,92,.08); }
+.sensor-card.state-danger, .microphone-section.state-danger { border-color: var(--error); background: rgba(216,120,102,.10); }
 .sensor-readings span { display: block; color: var(--faint); font-size: 9px; text-transform: uppercase; }
 .sensor-readings strong { color: var(--text); font-size: 18px; font-weight: 400; font-variant-numeric: tabular-nums; }
-.quality-reading { border-left-color: var(--accent) !important; }
-.alert-panel {
-  position: absolute;
-  right: clamp(28px, 7vw, 110px);
-  bottom: 28px;
-  left: clamp(28px, 7vw, 110px);
-  border-top: 1px solid var(--line);
-  padding-top: 8px;
-}
-.alert-heading { display: flex; justify-content: space-between; gap: 12px; }
-.alert-heading h2 { margin: 0; font-size: 12px; font-weight: 500; }
-.alert-heading span { color: var(--faint); font-size: 10px; }
-.alert-panel ul { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 6px 0 0; padding: 0; list-style: none; color: var(--error); font-size: 11px; }
-.alert-panel .alert-none { color: var(--faint); }
-.alert-panel.has-alert { border-top-color: var(--error); }
 .protocol-note {
   position: absolute;
   bottom: 38px;
@@ -188,14 +191,13 @@ h3 { margin-bottom: 15px; color: var(--faint); font-size: 10px; letter-spacing: 
   .app-shell { display: block; }
   .hero-panel { min-height: 67vh; padding-top: 30px; }
   .mantle-visual { top: 35%; right: 28px; bottom: 34%; left: 28px; }
-  .alert-panel { right: 28px; bottom: 28px; left: 28px; }
   .protocol-note { right: 28px; bottom: 28px; left: 28px; }
   .controls-panel { min-height: auto; border-top: 1px solid var(--line); border-left: 0; }
 }
 @media (max-width: 520px) {
   h1 { font-size: 64px; }
   .mantle-visual { position: relative; top: auto; right: auto; bottom: auto; left: auto; height: 260px; margin: 32px 28px 0; }
-  .sensor-readings, .alert-panel { position: static; margin: 20px 28px 0; }
+  .sensor-readings { position: static; margin: 20px 28px 0; }
   .protocol-note { position: static; margin-top: 42px; }
   .hero-panel { min-height: auto; }
 }

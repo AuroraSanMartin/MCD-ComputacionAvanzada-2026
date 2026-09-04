@@ -12,18 +12,14 @@
     <section class="hero-panel">
       <div class="screen-gradient screen-gradient-left" aria-hidden="true"></div>
       <div class="screen-gradient screen-gradient-right" aria-hidden="true"></div>
+      <div class="air-quality-glow" aria-hidden="true"></div>
       <header class="project-header">
         <p class="eyebrow">COMPUTACIÓN AVANZADA · EXERCISE 03</p>
-        <h1>Puente serial</h1>
-        <p class="subtitle">Base para enviar comandos desde el navegador y recibir datos desde Arduino.</p>
+        <h1>Simulador de sobrecarga sensorial</h1>
+        <p class="subtitle">Visualización en tiempo real de la interacción entre los sensores y el entorno.</p>
       </header>
 
       <div id="mantle-visual" class="mantle-visual" aria-label="Visualización tridimensional de las ondas auditivas"></div>
-
-      <section class="alert-panel" aria-live="assertive">
-        <div class="alert-heading"><h2>Alertas sensoriales</h2><span>En tiempo real</span></div>
-        <ul id="alert-list"><li class="alert-none">Sin alertas</li></ul>
-      </section>
 
       <div class="protocol-note">
         <span class="protocol-index">01</span>
@@ -46,7 +42,7 @@
         <p id="browser-note" class="support-note"></p>
       </section>
 
-      <section class="microphone-section">
+      <section id="microphone-section" class="microphone-section state-normal">
         <div class="mic-heading"><h3>Micrófono del computador</h3><strong id="decibel-value">---</strong></div>
         <p id="microphone-status" class="support-note">Sin permiso de micrófono</p>
         <button id="microphone-button" class="secondary" type="button">Activar micrófono</button>
@@ -54,18 +50,18 @@
 
       <section class="sensor-readings" aria-live="polite">
         <div class="reading-pair">
-          <article><span>Perfume · A0</span><strong id="alcohol135-value">---</strong></article>
-          <article><span>CO9 · A1</span><strong id="co9-value">---</strong></article>
+          <article class="sensor-card" data-sensor="alcohol135"><span>Perfume · A0</span><strong id="alcohol135-value">---</strong></article>
+          <article class="sensor-card" data-sensor="co9"><span>CO9 · A1</span><strong id="co9-value">---</strong></article>
         </div>
         <div class="reading-pair">
-          <article><span>OjoIzq · A4</span><strong id="ojo-izq-value">---</strong></article>
-          <article><span>OjoDer · A3</span><strong id="ojo-der-value">---</strong></article>
+          <article class="sensor-card" data-sensor="ojoIzq"><span>OjoIzq · A4</span><strong id="ojo-izq-value">---</strong></article>
+          <article class="sensor-card" data-sensor="ojoDer"><span>OjoDer · A3</span><strong id="ojo-der-value">---</strong></article>
         </div>
         <div class="reading-pair">
-          <article><span>OidoIzq · A7</span><strong id="oido-izq-value">---</strong></article>
-          <article><span>OidoDer · A6</span><strong id="oido-der-value">---</strong></article>
+          <article class="sensor-card" data-sensor="oidoIzq"><span>OidoIzq · A7</span><strong id="oido-izq-value">---</strong></article>
+          <article class="sensor-card" data-sensor="oidoDer"><span>OidoDer · A6</span><strong id="oido-der-value">---</strong></article>
         </div>
-        <article class="quality-reading"><span>Calidad del aire · suma</span><strong id="air-quality-value">---</strong></article>
+        <article class="sensor-card quality-reading" data-sensor="airQuality"><span>Calidad del aire · suma</span><strong id="air-quality-value">---</strong></article>
       </section>
 
     </aside>

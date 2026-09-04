@@ -2,6 +2,7 @@ import * as THREE from "three";
 
 const container = document.querySelector("#mantle-visual");
 const heroPanel = document.querySelector(".hero-panel");
+const airQualityGlow = document.querySelector(".air-quality-glow");
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -97,8 +98,12 @@ function updateMantle(time) {
   const frameDelta = previousFrameTime === 0 ? 16 : Math.min(50, time - previousFrameTime);
   previousFrameTime = time;
   const smoothFactor = 1 - Math.exp(-frameDelta / 140);
-  const airQualityBlur = THREE.MathUtils.smoothstep(airQuality / 8190, 0.2, 1) * 10;
+  const airQualityBlur = THREE.MathUtils.smoothstep(airQuality, 600, 1000) * 24;
   container.style.setProperty("--mantle-blur", `${airQualityBlur.toFixed(2)}px`);
+  const airQualityIntensity = THREE.MathUtils.smoothstep(airQuality, 600, 1000);
+  const glowSize = airQualityIntensity * Math.min(heroPanel.clientWidth, heroPanel.clientHeight) * 1.15;
+  airQualityGlow.style.setProperty("--air-quality-glow-size", `${glowSize.toFixed(1)}px`);
+  airQualityGlow.style.setProperty("--air-quality-glow-opacity", (airQualityIntensity * 0.8).toFixed(3));
 
   const leftEyeLight = 1 - Math.min(1, leftEyeValue / 4095);
   const rightEyeLight = 1 - Math.min(1, rightEyeValue / 4095);
