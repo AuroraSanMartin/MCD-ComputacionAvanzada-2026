@@ -98,7 +98,7 @@ function updateMantle(time) {
   const frameDelta = previousFrameTime === 0 ? 16 : Math.min(50, time - previousFrameTime);
   previousFrameTime = time;
   const smoothFactor = 1 - Math.exp(-frameDelta / 140);
-  const airQualityBlur = THREE.MathUtils.smoothstep(airQuality, 600, 1000) * 24;
+  const airQualityBlur = THREE.MathUtils.smoothstep(airQuality, 700, 1500) * 24;
   container.style.setProperty("--mantle-blur", `${airQualityBlur.toFixed(2)}px`);
   const airQualityIntensity = THREE.MathUtils.smoothstep(airQuality, 600, 1000);
   const glowSize = airQualityIntensity * Math.min(heroPanel.clientWidth, heroPanel.clientHeight) * 1.15;

@@ -6,6 +6,7 @@ const int OIDO_DER_PIN = A6;
 const int OJO_IZQ_PIN = A4;
 const int OJO_DER_PIN = A3;
 
+
 const int SATURATION_THRESHOLD = 3600;
 const int DIFFERENCE_THRESHOLD = 1000;
 const int LIGHT_OVERLOAD_THRESHOLD = 1000;
@@ -13,6 +14,7 @@ const int VISUAL_DIFFERENCE_THRESHOLD = 500;
 const int LIGHT_FLICKER_DELTA = 120;
 const int LIGHT_FLICKER_CHANGES_REQUIRED = 5;
 const int LIGHT_HISTORY_SIZE = 12;
+
 
 unsigned long lastSensorRead = 0;
 unsigned long lastLightSample = 0;
@@ -35,6 +37,7 @@ void setup() {
 }
 
 void loop() {
+
   if (millis() - lastLightSample >= LIGHT_SAMPLE_INTERVAL) {
     lastLightSample = millis();
     ojoIzqActual = analogRead(OJO_IZQ_PIN);
