@@ -100,7 +100,7 @@ function updateMantle(time) {
   const smoothFactor = 1 - Math.exp(-frameDelta / 140);
   const airQualityBlur = THREE.MathUtils.smoothstep(airQuality, 700, 1500) * 24;
   container.style.setProperty("--mantle-blur", `${airQualityBlur.toFixed(2)}px`);
-  const airQualityIntensity = THREE.MathUtils.smoothstep(airQuality, 600, 1000);
+  const airQualityIntensity = THREE.MathUtils.smoothstep(airQuality, 800, 1500);
   const glowSize = airQualityIntensity * Math.min(heroPanel.clientWidth, heroPanel.clientHeight) * 1.15;
   airQualityGlow.style.setProperty("--air-quality-glow-size", `${glowSize.toFixed(1)}px`);
   airQualityGlow.style.setProperty("--air-quality-glow-opacity", (airQualityIntensity * 0.8).toFixed(3));
